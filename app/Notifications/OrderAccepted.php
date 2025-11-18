@@ -7,7 +7,7 @@ use App\Jobs\SendWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+// use Illuminate\Notifications\Messages\MailMessage; // ⛔ Désactivé (email)
 use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class OrderAccepted extends Notification implements ShouldQueue
@@ -20,10 +20,20 @@ class OrderAccepted extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast', 'mail'];
-        // Retirez \App\Notifications\Channels\WebPushChannel::class
+        // Ancien :
+        // return ['database', 'broadcast', 'mail'];
+
+        // ✅ Mail supprimé pour éviter les erreurs SMTP
+        return ['database', 'broadcast'];
     }
 
+    /*
+    |----------------------------------------------------------
+    | Désactivation complète de l'envoi d'email
+    |----------------------------------------------------------
+    */
+
+    /*
     public function toMail($notifiable)
     {
         return (new MailMessage)
@@ -34,6 +44,7 @@ class OrderAccepted extends Notification implements ShouldQueue
             ->action('Voir la commande', route('orders.show', $this->order->id))
             ->line('Merci pour votre confiance !');
     }
+    */
 
     public function toArray($notifiable)
     {

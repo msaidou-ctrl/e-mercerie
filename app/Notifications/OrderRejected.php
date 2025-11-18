@@ -7,7 +7,8 @@ use App\Jobs\SendWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+// use Illuminate\Notifications\Messages\MailMessage; // ⛔ Mail désactivé
+use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class OrderRejected extends Notification implements ShouldQueue
 {
@@ -19,10 +20,20 @@ class OrderRejected extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast', 'mail'];
-        // Retirez \App\Notifications\Channels\WebPushChannel::class
+        // Ancien :
+        // return ['database', 'broadcast', 'mail'];
+
+        // ✅ Mail retiré
+        return ['database', 'broadcast'];
     }
 
+    /*
+    |----------------------------------------------------------
+    | Désactivation complète de l'envoi d'email
+    |----------------------------------------------------------
+    */
+
+    /*
     public function toMail($notifiable)
     {
         return (new MailMessage)
@@ -33,6 +44,7 @@ class OrderRejected extends Notification implements ShouldQueue
             ->action('Voir les détails', route('orders.show', $this->order->id))
             ->line('Nous vous invitons à contacter la mercerie pour plus d\'informations.');
     }
+    */
 
     public function toArray($notifiable)
     {
@@ -46,7 +58,7 @@ class OrderRejected extends Notification implements ShouldQueue
 
     public function toBroadcast($notifiable)
     {
-        return new \Illuminate\Notifications\Messages\BroadcastMessage([
+        return new BroadcastMessage([
             'order_id' => $this->order->id,
             'message' => 'Votre commande #' . $this->order->id . ' a été rejetée',
             'url' => route('orders.show', $this->order->id),
