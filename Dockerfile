@@ -15,7 +15,8 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # ✅ Créer les tables de session/cache
-RUN php artisan cache:table --no-interaction || true
+# RUN php artisan session:table --no-interaction || true
+# RUN php artisan cache:table --no-interaction || true
 
 # ✅ Permissions correctes
 RUN chown -R www-data:www-data storage bootstrap/cache && \
