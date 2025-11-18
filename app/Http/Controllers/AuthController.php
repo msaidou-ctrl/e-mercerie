@@ -11,43 +11,164 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    // Inscription
     // Afficher le formulaire d'inscription
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
-    // Inscription via Blade
+    // Inscription via Blade - CORRIGÉ
     public function registerWeb(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:mercerie,couturier',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|unique:users',
+                'password' => 'required|string|min:6|confirmed',
+                'role' => 'required|in:mercerie,couturier',
+            ]);
 
-        // 📦 Avatar par défaut selon le rôle
-        $defaultAvatar = $data['role'] === 'mercerie'
-            ? 'images/avatars/mercerie.png'
-            : 'images/avatars/couturier.png';
+            // Avatar par défaut selon le rôle
+            $defaultAvatar = $data['role'] === 'mercerie'
+                ? 'images/avatars/mercerie.png'
+                : 'images/avatars/couturier.png';
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'],
-            'avatar' => $defaultAvatar, // <--- ajout ici
-        ]);
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'role' => $data['role'],
+                'avatar' => $defaultAvatar,
+            ]);
 
-        // Dispatch email verification notification
-        event(new Registered($user));
+            // Log pour debug
+            Log::info('Utilisateur créé avec succès', ['user_id' => $user->id, 'email' => $user->email]);
 
-        return redirect()->route('login.form')->with('success', 'Inscription réussie ! Un email de confirmation vous a été envoyé.');
+            // Dispatch email verification notification
+            event(new Registered($user));
+
+            // ✅ CONNEXION AUTOMATIQUE après inscription
+            auth()->login($user);
+            
+            // Régénérer la session pour sécurité
+            $request->session()->regenerate();
+
+            Log::info('Utilisateur connecté après inscription', ['user_id' => $user->id]);
+
+            // ✅ Redirection selon le rôle SANS vérification email obligatoire
+            if ($user->isMercerie()) {
+                return redirect()->route('merchant.supplies.index')
+                    ->with('success', 'Inscription réussie ! Bienvenue sur votre espace mercerie.');
+            } else {
+                return redirect()->route('supplies.selection')
+                    ->with('success', 'Inscription réussie ! Bienvenue sur votre espace couturier.');
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de l\'inscription', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->with('error', 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
+        }
+    }
+
+    // Afficher le formulaire de connexion
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    // Connexion via Blade - CORRIGÉ
+    public function loginWeb(Request $request)
+    {
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
+
+            Log::info('Tentative de connexion', ['email' => $credentials['email']]);
+
+            // ✅ Vérifier si l'utilisateur existe
+            $user = User::where('email', $credentials['email'])->first();
+            
+            if (!$user) {
+                Log::warning('Utilisateur introuvable', ['email' => $credentials['email']]);
+                return back()->withErrors(['email' => 'Aucun compte trouvé avec cet email.'])->withInput();
+            }
+
+            // ✅ Vérifier le mot de passe
+            if (!Hash::check($credentials['password'], $user->password)) {
+                Log::warning('Mot de passe incorrect', ['email' => $credentials['email']]);
+                return back()->withErrors(['email' => 'Email ou mot de passe incorrect.'])->withInput();
+            }
+
+            // ✅ Connexion manuelle
+            auth()->login($user, $request->filled('remember'));
+            $request->session()->regenerate();
+
+            Log::info('Connexion réussie', ['user_id' => $user->id, 'email' => $user->email]);
+
+            // ✅ Gestion de la redirection
+            $redirectTo = $request->input('redirect_to');
+            
+            if (!empty($redirectTo)) {
+                // Valider l'URL de redirection
+                if (strpos($redirectTo, '/') === 0) {
+                    return redirect($redirectTo)->with('success', 'Connexion réussie !');
+                }
+
+                $parsed = parse_url($redirectTo);
+                if ($parsed && isset($parsed['host'])) {
+                    $targetHost = $parsed['host'];
+                    $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+                    $requestHost = $request->getHost();
+                    
+                    if ($targetHost === $appHost || $targetHost === $requestHost) {
+                        return redirect($redirectTo)->with('success', 'Connexion réussie !');
+                    }
+                }
+            }
+
+            // ✅ Redirection par défaut selon le rôle
+            if ($user->isMercerie()) {
+                return redirect()->route('merchant.supplies.index')->with('success', 'Connexion réussie !');
+            } elseif ($user->isCouturier()) {
+                return redirect()->route('supplies.selection')->with('success', 'Connexion réussie !');
+            } elseif ($user->isAdmin()) {
+                return redirect()->route('admin.supplies.index')->with('success', 'Connexion réussie !');
+            }
+
+            return redirect()->route('landing')->with('success', 'Connexion réussie !');
+
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la connexion', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()
+                ->withInput($request->only('email'))
+                ->with('error', 'Une erreur est survenue. Veuillez réessayer.');
+        }
+    }
+
+    // Déconnexion via Blade
+    public function logoutWeb(Request $request)
+    {
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login.form')->with('success', 'Déconnexion réussie !');
     }
 
     // Show form to request password reset link
@@ -96,7 +217,7 @@ class AuthController extends Controller
                     : back()->withErrors(['email' => [__($status)]]);
     }
 
-    // Email verification views / actions
+    // Email verification views / actions - OPTIONNEL maintenant
     public function verificationNotice()
     {
         return view('auth.verify');
@@ -104,25 +225,23 @@ class AuthController extends Controller
 
     public function verify(Request $request, $id, $hash)
     {
-        // Allow verification via signed link even if the visitor is not authenticated.
         $user = User::find($id);
         if (! $user) {
             abort(404);
         }
 
-        // Ensure the hash matches the user's email
         if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
             abort(403);
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->route('login.form');
+            return redirect()->route('landing')->with('info', 'Email déjà vérifié.');
         }
 
         $user->markEmailAsVerified();
         event(new Verified($user));
 
-        return redirect()->route('login.form')->with('success', 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.');
+        return redirect()->route('landing')->with('success', 'Email vérifié avec succès !');
     }
 
     public function resend(Request $request)
@@ -137,59 +256,4 @@ class AuthController extends Controller
         $user->sendEmailVerificationNotification();
         return back()->with('success', 'Email de vérification renvoyé.');
     }
-
-
-    // Afficher le formulaire de connexion
-    public function showLoginForm()
-    {
-        return view('auth.login');
-    }
-
-    // Connexion via Blade
-    public function loginWeb(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        if (!auth()->attempt($credentials)) {
-            return back()->withErrors(['email' => 'Identifiants incorrects'])->withInput();
-        }
-
-        $request->session()->regenerate();
-
-        // If a redirect_to value was provided (from localStorage via hidden input), validate it and redirect there
-        $redirectTo = $request->input('redirect_to');
-        if (!empty($redirectTo)) {
-            // Allow relative paths (starting with '/')
-            if (strpos($redirectTo, '/') === 0) {
-                return redirect($redirectTo)->with('success', 'Connexion réussie !');
-            }
-
-            // If absolute URL, allow when host matches app.url host or current request host (handles 127.0.0.1:8000, localhost variants)
-            $parsed = parse_url($redirectTo);
-            if ($parsed && isset($parsed['host'])) {
-                $targetHost = $parsed['host'];
-                $appHost = parse_url(config('app.url') ?? url('/'), PHP_URL_HOST);
-                $requestHost = $request->getHost();
-                if ($targetHost === $appHost || $targetHost === $requestHost) {
-                    return redirect($redirectTo)->with('success', 'Connexion réussie !');
-                }
-            }
-        }
-
-        return redirect()->route('landing')->with('success', 'Connexion réussie !');
-    }
-
-    // Déconnexion via Blade
-    public function logoutWeb(Request $request)
-    {
-        auth()->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('login.form')->with('success', 'Déconnexion réussie !');
-    }
-
 }
