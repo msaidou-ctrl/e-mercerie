@@ -33,13 +33,14 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /var/www
 COPY --from=build /var/www /var/www
 
-# ✅ Permissions
-RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache
+# 🔥 Grands permissions pour storage et public
+RUN chown -R www-data:www-data storage bootstrap/cache public && \
+    chmod -R 775 storage bootstrap/cache public
 
-USER www-data
+# 🚫 NE PAS changer d’utilisateur avant storage:link
+# USER www-data   ← ❌ ENLEVER CECI
 
-# ✅ Commande de démarrage améliorée
+# Commande de démarrage en root
 CMD ["sh", "-c", "\
     php artisan storage:link && \
     php artisan migrate --force && \
@@ -47,3 +48,6 @@ CMD ["sh", "-c", "\
 "]
 
 EXPOSE $PORT
+
+# Après les commandes Artisan, tu peux repasser en www-data si tu veux :
+# USER www-data
