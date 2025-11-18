@@ -42,8 +42,8 @@ RUN chown -R www-data:www-data storage bootstrap/cache public && \
 
 # Commande de démarrage en root
 CMD ["sh", "-c", "\
-    php artisan storage:link && \
-    php artisan migrate --force && \
+    php artisan config:cache && \
+    php artisan config:clear && \
     php artisan serve --host=0.0.0.0 --port=$PORT\
 "]
 
