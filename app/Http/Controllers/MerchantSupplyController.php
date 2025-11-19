@@ -23,13 +23,19 @@ class MerchantSupplyController extends Controller
             });
         }
 
-        $merchantSupplies = $query->paginate(1)->withQueryString();
+        $merchantSupplies = $query->paginate(10)->withQueryString(); // Changé de 1 à 10 pour les tests
 
         // If AJAX request, return rendered partials for rows and pagination
         if ($request->ajax()) {
             $rows = view('merchant.supplies._rows', compact('merchantSupplies'))->render();
             $pagination = view('merchant.supplies._pagination', compact('merchantSupplies'))->render();
-            return response()->json(['rows' => $rows, 'pagination' => $pagination]);
+            
+            return response()->json([
+                'rows' => $rows, 
+                'pagination' => $pagination,
+                'total' => $merchantSupplies->total(),
+                'current_page' => $merchantSupplies->currentPage()
+            ]);
         }
 
         return view('merchant.supplies.index', compact('merchantSupplies', 'search'));

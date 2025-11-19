@@ -94,7 +94,7 @@
       }
       const right = document.createElement('div');
       total += Math.round(linePrice || 0);
-      right.innerHTML = `<div class="text-end">${formatPrice(Math.round(linePrice || 0))}<br><button class="btn btn-sm btn-link text-danger remove-cart" data-id="${item.id}" data-merchant="${item.merchant_id}" data-measure="${escapeHtml(item.measure_requested ?? '')}">Supprimer</button></div>`;
+      right.innerHTML = `<div class="text-end">${formatPrice(Math.round(linePrice || 0))}<br><button class="btn btn-sm btn-link text-danger remove-cart" data-id="${item.id}" data-merchant="${item.merchant_id}" data-measure="${escapeHtml(item.measure_requested ?? '')}"><i class="fa-solid fa-trash"></i></button></div>`;
       left.innerHTML = lineHtmlLeft;
       line.appendChild(left); line.appendChild(right);
       container.appendChild(line);

@@ -524,10 +524,11 @@ h6,
 
 /* primary buttons */
 .primary-btn {
-  background: linear-gradient(135deg, #4F0341, #9333ea);
+  background: #4F0341;
   color: #fff;
 }
 .primary-btn:hover {
+  background: #9333ea;
   color: #fff;
 }
 
@@ -3755,6 +3756,16 @@ h6,
   padding: 0 25px;
   margin-bottom: 30px;
   margin-top: 11px;
+}
+
+.navbar-logo img {
+  max-width: 120px;
+  width: 100%;
+}
+.sidebar-nav-wrapper .sidebar-nav {
+  overflow-y: auto;
+  height: calc(100vh - 100px);
+  padding-bottom: 30px;
 }
 .sidebar-nav-wrapper .sidebar-nav .divider {
   padding: 5px 25px;

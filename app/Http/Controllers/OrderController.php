@@ -24,35 +24,61 @@ class OrderController extends Controller
         $endDate = $request->input('end_date');
 
         $query = null;
+        $statsQuery = null; // Requête séparée pour les statistiques
 
         if ($user->isCouturier()) {
             $query = $user->ordersAsCouturier()
                 ->with(['items.merchantSupply', 'mercerie'])
                 ->latest();
+                
+            $statsQuery = $user->ordersAsCouturier(); // Même base pour les stats
         } elseif ($user->isMercerie()) {
             $query = $user->ordersAsMercerie()
                 ->with(['items.merchantSupply', 'couturier'])
                 ->latest();
+                
+            $statsQuery = $user->ordersAsMercerie(); // Même base pour les stats
         }
 
+        // Appliquer les mêmes filtres aux deux requêtes
         if ($query && $search) {
-            $query->where(function ($q) use ($search) {
+            $searchFilter = function ($q) use ($search) {
                 $q->whereHas('mercerie', fn($m) => $m->where('name', 'like', "%$search%"))
                 ->orWhere('id', 'like', "%$search%")
                 ->orWhere('status', 'like', "%$search%");
-            });
+            };
+            
+            $query->where($searchFilter);
+            $statsQuery->where($searchFilter);
         }
 
         if ($query && ($startDate || $endDate)) {
-            $query->whereBetween('created_at', [
+            $dateFilter = [
                 $startDate ? date('Y-m-d 00:00:00', strtotime($startDate)) : '2000-01-01 00:00:00',
                 $endDate ? date('Y-m-d 23:59:59', strtotime($endDate)) : now(),
-            ]);
+            ];
+            
+            $query->whereBetween('created_at', $dateFilter);
+            $statsQuery->whereBetween('created_at', $dateFilter);
         }
 
-        $orders = $query ? $query->paginate(2)->appends($request->query()) : collect();
+        // Pagination pour l'affichage
+        $orders = $query ? $query->paginate(10)->appends($request->query()) : collect();
+        
+        // Statistiques sur TOUTES les commandes (pas seulement la page actuelle)
+        $stats = $statsQuery ? [
+            'total' => $statsQuery->count(),
+            'pending' => $statsQuery->where('status', 'pending')->count(),
+            'confirmed' => $statsQuery->where('status', 'confirmed')->count(),
+            'cancelled' => $statsQuery->where('status', 'cancelled')->count(),
+        ] : [
+            'total' => 0,
+            'pending' => 0,
+            'confirmed' => 0,
+            'cancelled' => 0,
+        ];
 
-        return view('orders.index', compact('orders', 'search', 'startDate', 'endDate'));
+        return view('orders.index', compact('orders', 'stats', 'search', 'startDate', 'endDate'));
     }
 
 

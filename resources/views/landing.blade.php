@@ -113,10 +113,12 @@ header.scrolled {
   gap: 8px;
 }
 
-.logo::before {
-  content: "🪡";
-  font-size: 1.4rem;
+.logo img {
+  height: 72px;
+  width: 72px;
 }
+
+
 
 header.scrolled .logo {
   color: var(--primary-color);
@@ -1488,7 +1490,9 @@ footer p {
 <body>
 
 <header id="header">
-  <a href="{{ route('landing') }}" class="logo">E-mercerie</a>
+  <a href="{{ route('landing') }}" class="logo">
+    <img src="{{ asset('images/logo.png') }}" alt="">
+  </a>
   @if(!Auth::check())
     <a href="{{ route('login.form') }}" class="btn-signin">
       <i class="fas fa-sign-in-alt"></i> Se connecter

@@ -6,8 +6,6 @@
         <h1>Mes commandes</h1>
     </div>
 
-    <!-- <p class="page-subtitle">Gérez et suivez l'état de vos commandes</p> -->
-
     <!-- 🔍 Barre de recherche -->
     <form method="GET" action="{{ route('orders.index') }}" id="filterForm" class="filter-bar">
         <div class="filter-group">
@@ -154,11 +152,14 @@
                     @if(auth()->user()->isMercerie() && $order->status === 'pending')
                         <div class="actions">
                             @if($order->canBeAccepted())
-                                <form action="{{ route('merchant.orders.accept', $order->id) }}" method="POST" class="action-form">
+                                <form action="{{ route('merchant.orders.accept', $order->id) }}" method="POST" class="action-form accept-form">
                                     @csrf
-                                    <button type="submit" class="soft-btn success-btn">
+                                    <button type="submit" class="soft-btn success-btn accept-btn" data-order-id="{{ $order->id }}">
                                         <i class="fa-solid fa-check"></i>
-                                        Accepter
+                                        <span class="btn-text">Accepter</span>
+                                        <div class="btn-loader hidden">
+                                            <div class="loader-spinner"></div>
+                                        </div>
                                     </button>
                                 </form>
                             @else
@@ -168,11 +169,14 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('merchant.orders.reject', $order->id) }}" method="POST" class="action-form">
+                            <form action="{{ route('merchant.orders.reject', $order->id) }}" method="POST" class="action-form reject-form">
                                 @csrf
-                                <button type="submit" class="soft-btn danger-btn">
+                                <button type="submit" class="soft-btn danger-btn reject-btn" data-order-id="{{ $order->id }}">
                                     <i class="fa-solid fa-xmark"></i>
-                                    Rejeter
+                                    <span class="btn-text">Rejeter</span>
+                                    <div class="btn-loader hidden">
+                                        <div class="loader-spinner"></div>
+                                    </div>
                                 </button>
                             </form>
                         </div>
@@ -227,6 +231,56 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
     document.getElementById('end_date').value = '';
     document.getElementById('filterForm').submit();
 });
+
+// Gestion des loaders pour les boutons Accepter/Rejeter
+document.addEventListener('DOMContentLoaded', function() {
+    const acceptButtons = document.querySelectorAll('.accept-btn');
+    const rejectButtons = document.querySelectorAll('.reject-btn');
+    
+    // Fonction pour gérer le clic sur les boutons
+    function handleActionButtonClick(button, isAccept = true) {
+        const form = button.closest('form');
+        const orderId = button.dataset.orderId;
+        const btnText = button.querySelector('.btn-text');
+        const btnLoader = button.querySelector('.btn-loader');
+        const btnIcon = button.querySelector('i');
+        
+        // Désactiver le bouton et afficher le loader
+        button.disabled = true;
+        btnText.textContent = isAccept ? 'Traitement...' : 'Rejet en cours...';
+        btnIcon.style.opacity = '0';
+        btnLoader.classList.remove('hidden');
+        
+        // Empêcher les clics multiples
+        const allActionButtons = document.querySelectorAll('.accept-btn, .reject-btn');
+        allActionButtons.forEach(btn => {
+            if (btn !== button) {
+                btn.disabled = true;
+            }
+        });
+        
+        // Soumettre le formulaire après un petit délai pour l'effet visuel
+        setTimeout(() => {
+            form.submit();
+        }, 500);
+    }
+    
+    // Événements pour les boutons Accepter
+    acceptButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleActionButtonClick(this, true);
+        });
+    });
+    
+    // Événements pour les boutons Rejeter
+    rejectButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleActionButtonClick(this, false);
+        });
+    });
+});
 </script>
 
 <style>
@@ -258,6 +312,62 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
     --radius-lg: 16px;
     --radius-xl: 20px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- LOADERS POUR BOUTONS --- */
+.btn-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Styles spécifiques pour les boutons avec loaders */
+.accept-btn,
+.reject-btn {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.accept-btn:disabled,
+.reject-btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.accept-btn.loading,
+.reject-btn.loading {
+    pointer-events: none;
+}
+
+/* Animation de pulse pendant le chargement */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.accept-btn:disabled,
+.reject-btn:disabled {
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
 /* --- CONTAINER --- */
@@ -370,7 +480,7 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
     transform: translateY(-2px);
 }
 
-/* --- STATISTIQUES --- */
+/* --- STATISTIQUES AMÉLIORÉES --- */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -409,6 +519,7 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
 .stat-icon.total { background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); }
 .stat-icon.pending { background: linear-gradient(135deg, var(--warning-color), #f59e0b); }
 .stat-icon.confirmed { background: linear-gradient(135deg, var(--success-color), #22c55e); }
+.stat-icon.cancelled { background: linear-gradient(135deg, var(--cancelled-color), #9ca3af); }
 
 .stat-content {
     display: flex;
@@ -700,6 +811,7 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
     font-size: 0.9rem;
     text-decoration: none;
     width: 100%;
+    position: relative;
 }
 
 .success-btn {
@@ -708,7 +820,7 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
     box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
 }
 
-.success-btn:hover {
+.success-btn:hover:not(:disabled) {
     background: #15803d;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
@@ -720,7 +832,7 @@ document.getElementById('clearFilters')?.addEventListener('click', function() {
     box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
 
-.danger-btn:hover {
+.danger-btn:hover:not(:disabled) {
     background: #b91c1c;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);

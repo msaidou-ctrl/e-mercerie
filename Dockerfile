@@ -44,6 +44,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache public && \
 CMD ["sh", "-c", "\
     php artisan config:cache && \
     php artisan config:clear && \
+    php artisan storage:link && \
     php artisan serve --host=0.0.0.0 --port=$PORT\
 "]
 

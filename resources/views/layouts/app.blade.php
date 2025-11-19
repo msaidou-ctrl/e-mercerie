@@ -42,8 +42,8 @@
     <!-- ======== sidebar-nav start =========== -->
     <aside class="sidebar-nav-wrapper">
       <div class="navbar-logo">
-        <a href="index.html">
-          <img src="assets/images/logo/logo.svg" alt="logo" />
+        <a href="{{ route('landing') }}">
+          <img src="{{ asset('images/logo.png') }}" alt="logo" />
         </a>
       </div>
       <nav class="sidebar-nav">
@@ -503,7 +503,7 @@
         <div class="modal-dialog modal-lg modal-dialog-end">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">🛍️ Votre panier</h5>
+              <h5 class="modal-title">Votre panier</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
 
@@ -525,10 +525,10 @@
 
             <div class="modal-footer d-flex justify-content-between align-items-center">
               <div>Total : <strong id="cart-total">7 000 FCFA</strong></div>
-              <div>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <div style="display: flex; gap: 10px;">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                   Continuer mes achats
-                </button>
+                </button> -->
                 <button type="button" id="preview-cart-btn" class="btn btn-primary">
                   Prévisualiser la commande
                 </button>
