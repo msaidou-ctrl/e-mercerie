@@ -2,8 +2,9 @@
 
 @section('content')
 <div class="orders-container">
-    <div class="page-title">
+    <div class="card-header">
         <h1>Mes commandes</h1>
+        <p>Suivez et gérez en temps réel vos commandes</p>
     </div>
 
     <!-- 🔍 Barre de recherche -->
@@ -14,7 +15,7 @@
                     <i class="fa-solid fa-magnifying-glass"></i>
                     Recherche
                 </label>
-                <input type="text" name="search" id="search" placeholder="Nom, ID ou statut..."
+                <input type="text" name="search" id="search" placeholder="ID ou statut..."
                        value="{{ request('search') }}">
             </div>
             <div class="filter-item">
@@ -123,7 +124,7 @@
                         <div class="other-info">
                             <div class="other-avatar">
                                 <img src="{{ $other->avatar_url }}" alt="avatar" class="avatar-img">
-                                <div class="online-indicator"></div>
+                                <!-- <div class="online-indicator"></div> -->
                             </div>
                             <div class="other-details">
                                 <h4 class="other-name">{{ $other->name }}</h4>

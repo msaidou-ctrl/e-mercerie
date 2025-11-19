@@ -2,11 +2,9 @@
 
 @section('content')
 <!-- === TITRE PRINCIPAL === -->
-<div class="page-title text-center py-4 py-md-5" style="background: #4F0341; color: #fff;">
-    <div class="container">
-        <h1 class="fw-bold m-0 display-6">Liste des Merceries</h1>
-        <p class="mt-2 mb-0 opacity-75">Découvrez nos merceries partenaires et leurs produits</p>
-    </div>
+<div class="card-header">
+    <h1>Liste des merceries</h1>
+    <p>Découvrez nos merceries partenaires et leurs produits</p>
 </div>
 
 <!-- === CONTENU PRINCIPAL === -->
@@ -27,7 +25,7 @@
     <div class="results-count mb-4 text-center">
         <span class="badge bg-primary rounded-pill px-3 py-2">
             <i class="fa-solid fa-store me-2"></i>
-            <span id="results-count">{{ $merceries->count() }}</span> mercerie(s) trouvée(s)
+                <span id="results-count">{{ $merceries->total() }}</span> mercerie(s) trouvée(s)
         </span>
     </div>
 
@@ -55,10 +53,10 @@
 
                     <!-- Contenu de la carte -->
                     <div class="card-content">
-                        <div class="card-header">
+                        <div class="card-head">
                             <h5 class="card-title">
-                                <i class="fa-solid fa-store me-2 text-primary"></i>{{ $mercerie->name }}
-                            </h5>
+                                    <i class="fa-solid fa-store me-2 text-primary"></i>{{ $mercerie->display_business_name }}
+                                </h5>
                             <div class="rating">
                                 <i class="fa-solid fa-star text-warning"></i>
                                 <span class="rating-text">4.5</span>
@@ -115,6 +113,11 @@
             </div>
         @endforelse
     </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-4">
+            {{ $merceries->links() }}
+        </div>
 
    
 </div>
@@ -328,7 +331,7 @@
     flex-direction: column;
 }
 
-.card-header {
+.card-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -550,7 +553,7 @@
         padding: 0.875rem 1.25rem;
     }
     
-    .card-header {
+    .card-head {
         flex-direction: column;
         gap: 0.5rem;
         align-items: flex-start;
@@ -700,7 +703,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
                     <div class="card-content">
-                        <div class="card-header">
+                        <div class="card-head">
                             <h5 class="card-title">
                                 <i class="fa-solid fa-store me-2 text-primary"></i>${mercerie.name}
                             </h5>

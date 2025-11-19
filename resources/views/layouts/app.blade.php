@@ -9,7 +9,7 @@
   @endauth
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ asset('images/logo.jpeg') }}" type="image/x-icon" />
     <title>@yield('title', 'e-Mercerie')</title>
 
     <!-- ========== All CSS files linkup ========= -->
@@ -441,7 +441,7 @@
 
                         </div>
                         <div class=" d-none d-md-block ms-2">
-                          <h6 class="fw-500">{{ auth()->user()->name }}</h6>
+                          <h6 class="fw-500">{{ auth()->user()->display_business_name }}</h6>
                           <p>{{ auth()->user()->email }}</p>
                         </div>
                       </div>
@@ -454,7 +454,7 @@
                           <img src="{{ $user->avatar_url }}" alt="image">
                         </div>
                         <div class="content">
-                          <h4 class="text-sm">{{ auth()->user()->name }}</h4>
+                          <h4 class="text-sm">{{ auth()->user()->display_business_name }}</h4>
                           <a class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs" href="#">{{ auth()->user()->email }}</a>
                         </div>
                       </div>

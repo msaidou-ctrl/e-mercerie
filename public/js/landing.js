@@ -5,7 +5,6 @@
   const rootUrl = cfg.rootUrl || '';
   const routes = cfg.routes || {};
   const suppliesSearch = routes.suppliesSearch || '/api/fournitures/search';
-  const merceriesSearch = routes.merceriesSearch || '/api/merceries/search';
   const cityQuarters = routes.cityQuarters || '/api/cities/:id/quarters';
   const pushSubscribe = routes.pushSubscribe || '';
   const assetDefaultImage = cfg.assetDefaultImage || (rootUrl + '/images/default.png');
@@ -73,6 +72,14 @@
 
   // DOM handlers
   document.addEventListener('DOMContentLoaded', function(){
+    // Cache initial server-rendered markup so we can restore it when the user clears a live-search
+    const __initial_supplies_list_el = document.getElementById('supplies-list');
+    const __initial_supplies_html = __initial_supplies_list_el ? __initial_supplies_list_el.innerHTML : null;
+    const __initial_supplies_pagination_el = document.querySelector('.pagination-block');
+    const __initial_supplies_pagination_html = __initial_supplies_pagination_el ? __initial_supplies_pagination_el.innerHTML : null;
+    const __initial_merceries_container = document.getElementById('merceries-container');
+    const __initial_merceries_html = __initial_merceries_container ? __initial_merceries_container.innerHTML : null;
+
     // quantity helpers
     function updateButtonStates(input,isMeasure){ const value=isMeasure?parseFloat(input.value):parseInt(input.value); const container=input.closest('.quantity-controls'); const minusBtn = container && container.querySelector('.quantity-btn.minus'); if(minusBtn) minusBtn.disabled = value <= 0; }
 
@@ -202,84 +209,9 @@
     }
 
     // live search supplies
-    (function(){ const suppliesInput = document.getElementById('search-live'); const suppliesList = document.getElementById('supplies-list'); const suppliesLoader = document.getElementById('search-loader'); if(!suppliesInput||!suppliesList) return; let debounce=null; suppliesInput.addEventListener('input', function(){ clearTimeout(debounce); debounce = setTimeout(async ()=>{ const q = suppliesInput.value.trim(); if(q.length===0){ window.location.reload(); return; } if(suppliesLoader) suppliesLoader.style.display='block'; try{ const url = suppliesSearch + '?search=' + encodeURIComponent(q); const res = await fetch(url, { headers: { 'Accept':'application/json' }, credentials: 'same-origin' }); if(!res.ok) throw new Error('Network'); const data = await res.json(); suppliesList.innerHTML=''; if(!data||data.length===0){ suppliesList.innerHTML = '<p class="empty-message">Aucune fourniture disponible pour le moment.</p>'; } else { data.forEach(s=>{ const isMeasure = s.sale_mode && s.sale_mode==='measure'; const unit = s.measure||'m'; const img = s.image_url || assetDefaultImage; const card = document.createElement('div'); card.className='supply-card'; card.dataset.id = s.id; card.innerHTML = '\n  <div class="supply-image"><img src="'+escapeHtml(img)+'" alt="'+escapeHtml(s.name)+'"></div>\n  <div class="supply-content">\n    <h3>'+escapeHtml(s.name)+'</h3>\n    <p class="description">'+escapeHtml(s.description||'')+'</p>\n    <div class="price-qty">\n      <div class="price"><span class="amount">'+Number(s.price).toLocaleString('fr-FR')+' FCFA'+(isMeasure?(' / '+unit):'')+'</span></div>\n      <div class="quantity-group">\n        '+(isMeasure?('<label for="measure_'+s.id+'">Mesure ('+unit+')</label><div class="quantity-controls"><button type="button" class="quantity-btn minus" data-target="measure_'+s.id+'" data-step="0.5"><i class="fas fa-minus"></i></button><input type="text" name="items['+s.id+'][measure_requested]" id="measure_'+s.id+'" value="0" data-measure="true" data-unit="'+unit+'" class="quantity-input" placeholder="0'+unit+'" /><button type="button" class="quantity-btn plus" data-target="measure_'+s.id+'" data-step="0.5"><i class="fas fa-plus"></i></button></div>') : ('<label for="quantity_'+s.id+'">Quantité</label><div class="quantity-controls"><button type="button" class="quantity-btn minus" data-target="quantity_'+s.id+'"><i class="fas fa-minus"></i></button><input type="number" name="items['+s.id+'][quantity]" id="quantity_'+s.id+'" value="0" min="0" class="quantity-input" /><button type="button" class="quantity-btn plus" data-target="quantity_'+s.id+'"><i class="fas fa-plus"></i></button></div>')) + '\n      </div>\n    </div>\n  </div>';
-            suppliesList.appendChild(card); }); }
-            document.querySelectorAll('.card').forEach(c=>observer.observe(c)); try{ window.SUPPLIES_STATE.applyToContainer(suppliesList);}catch(e){}
-          }catch(err){ suppliesList.innerHTML = '<p class="empty-message" style="color:#b91c1c;">Erreur lors de la recherche.</p>'; } finally { if(suppliesLoader) suppliesLoader.style.display='none'; }
-        },300); }); function escapeHtml(text){ const d=document.createElement('div'); d.textContent = text||''; return d.innerHTML; }
-    }());
+    (function(){ const suppliesInput = document.getElementById('search-live'); const suppliesList = document.getElementById('supplies-list'); const suppliesLoader = document.getElementById('search-loader'); if(!suppliesInput||!suppliesList) return; let debounce=null; suppliesInput.addEventListener('input', function(){ clearTimeout(debounce); debounce = setTimeout(async ()=>{ const q = suppliesInput.value.trim(); if(q.length===0){ try{ if(__initial_supplies_html !== null) suppliesList.innerHTML = __initial_supplies_html; if(__initial_supplies_pagination_html !== null){ const cur = document.querySelector('.pagination-block'); if(cur) cur.innerHTML = __initial_supplies_pagination_html; else { const wrapper = document.createElement('div'); wrapper.className='pagination-block'; wrapper.style.display='flex'; wrapper.style.justifyContent='center'; wrapper.style.marginTop='18px'; wrapper.innerHTML = __initial_supplies_pagination_html; suppliesList.insertAdjacentElement('afterend', wrapper); } } document.querySelectorAll('.card').forEach(c=>observer.observe(c)); try{ window.SUPPLIES_STATE.applyToContainer(suppliesList);}catch(e){} }catch(e){} if(suppliesLoader) suppliesLoader.style.display='none'; return; } if(suppliesLoader) suppliesLoader.style.display='block'; try{ const url = suppliesSearch + '?search=' + encodeURIComponent(q); const res = await fetch(url, { headers: { 'Accept':'application/json' }, credentials: 'same-origin' }); if(!res.ok) throw new Error('Network'); const data = await res.json(); suppliesList.innerHTML=''; if(!data||data.length===0){ suppliesList.innerHTML = '<p class="empty-message">Aucune fourniture disponible pour le moment.</p>'; } else { data.forEach(s=>{ const isMeasure = s.sale_mode && s.sale_mode==='measure'; const unit = s.measure||'m'; const img = s.image_url || assetDefaultImage; const card = document.createElement('div'); card.className='supply-card'; card.dataset.id = s.id; card.innerHTML = '\n  <div class="supply-image"><img src="'+escapeHtml(img)+'" alt="'+escapeHtml(s.name)+'"></div>\n  <div class="supply-content">\n    <h3>'+escapeHtml(s.name)+'</h3>\n    <p class="description">'+escapeHtml(s.description||'')+'</p>\n    <div class="price-qty">\n      <div class="price"><span class="amount">'+Number(s.price).toLocaleString('fr-FR')+' FCFA'+(isMeasure?(' / '+unit):'')+'</span></div>\n      <div class="quantity-group">\n        '+(isMeasure?('<label for="measure_'+s.id+'">Mesure ('+unit+')</label><div class="quantity-controls"><button type="button" class="quantity-btn minus" data-target="measure_'+s.id+'" data-step="0.5"><i class="fas fa-minus"></i></button><input type="text" name="items['+s.id+'][measure_requested]" id="measure_'+s.id+'" value="0" data-measure="true" data-unit="'+unit+'" class="quantity-input" placeholder="0'+unit+'" /><button type="button" class="quantity-btn plus" data-target="measure_'+s.id+'" data-step="0.5"><i class="fas fa-plus"></i></button></div>') : ('<label for="quantity_'+s.id+'">Quantité</label><div class="quantity-controls"><button type="button" class="quantity-btn minus" data-target="quantity_'+s.id+'"><i class="fas fa-minus"></i></button><input type="number" name="items['+s.id+'][quantity]" id="quantity_'+s.id+'" value="0" min="0" class="quantity-input" /><button type="button" class="quantity-btn plus" data-target="quantity_'+s.id+'"><i class="fas fa-plus"></i></button></div>')) + '\n      </div>\n    </div>\n  </div>';            suppliesList.appendChild(card); }); }            document.querySelectorAll('.card').forEach(c=>observer.observe(c)); try{ window.SUPPLIES_STATE.applyToContainer(suppliesList);}catch(e){} }catch(err){ suppliesList.innerHTML = '<p class="empty-message" style="color:#b91c1c;">Erreur lors de la recherche.</p>'; } finally { if(suppliesLoader) suppliesLoader.style.display='none'; }        },300); }); function escapeHtml(text){ const d=document.createElement('div'); d.textContent = text||''; return d.innerHTML; }    }());
 
-    // --- LIVE SEARCH FOR MERCERIES (landing) ---
-    (function(){
-      const input = document.getElementById('search-merceries-landing');
-      const container = document.getElementById('merceries-container');
-      const loader = document.getElementById('merceries-loader-landing');
-      const endpoint = (routes && routes.merceriesSearch) ? routes.merceriesSearch : '/api/merceries/search';
-      if(!input || !container) return;
-
-      let t = null;
-      input.addEventListener('input', function(){
-        clearTimeout(t);
-        t = setTimeout(async ()=>{
-          const q = input.value.trim();
-          // if empty, reload the page to restore server-rendered list
-          if(q.length === 0) {
-            window.location.reload();
-            return;
-          }
-
-          if(loader) loader.style.display = 'inline-block';
-
-            try{
-            // server expects `search` parameter (see MerchantController::searchAjax)
-            const url = endpoint + '?search=' + encodeURIComponent(q);
-            const res = await fetch(url, { headers: { 'Accept':'application/json' }, credentials: 'same-origin' });
-            if(!res.ok) throw new Error('Network');
-            const data = await res.json();
-
-            container.innerHTML = '';
-            if(!data || data.length === 0) {
-              container.innerHTML = '<div class="empty-message">Aucune mercerie trouvée.</div>';
-              return;
-            }
-
-            // Render cards matching server-side blade markup
-            data.forEach(m=>{
-              const card = document.createElement('div');
-              card.className = 'card';
-
-              // choose avatar_url from server payload, fall back to default asset
-              const imgSrc = m.avatar_url || assetDefaultImage;
-
-              const city = m.city || '';
-              const quarter = m.quarter || '';
-              const locationText = city ? ('📍 ' + city + (quarter ? ' — ' + quarter : '')) : '';
-
-              const link = rootUrl.replace(/\/$/, '') + '/merceries/' + encodeURIComponent(m.id || '');
-
-              card.innerHTML = `
-                <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(m.name)}">
-                <div class="card-content">
-                  <h3>${escapeHtml(m.name)}</h3>
-                  <div class="info">
-                    <div class="location">${escapeHtml(locationText)}</div>
-                  </div>
-                  <a href="${escapeHtml(link)}" class="btn">Voir plus</a>
-                </div>
-              `;
-              container.appendChild(card);
-            });
-
-            // re-observe for animations
-            document.querySelectorAll('.card').forEach(c=>observer.observe(c));
-          }catch(err){
-            container.innerHTML = '<div class="empty-message" style="color:#b91c1c;">Erreur lors de la recherche.</div>';
-          }finally{
-            if(loader) loader.style.display = 'none';
-          }
-        }, 300);
-      });
-    }());
+    // Mercerie live-search removed from landing page by server-side decision.
 
   }); // DOMContentLoaded end
 

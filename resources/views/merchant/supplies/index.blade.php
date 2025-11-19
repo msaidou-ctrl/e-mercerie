@@ -2,8 +2,9 @@
 
 @section('content')
 <!-- === TITRE PRINCIPAL === -->
-<div class="page-title">
+<div class="card-header">
   <h1>Mes Fournitures</h1>
+  <p>Gérez votre inventaire de fournitures</p>
 </div>
 
 <div class="container-fluid px-3 px-md-5">

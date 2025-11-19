@@ -4,6 +4,51 @@
 <style>
   /* === Styles Modernisés === */
 
+.card-head {
+    background: linear-gradient(135deg, #4F0341, #7a1761);
+    color: #fff;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border-bottom: none;
+    border-radius: 10px !important;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.card-head::before {
+    content: '';
+    position: absolute;
+    border-radius: 50px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    animation: float 20s infinite linear;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-100px) rotate(360deg); }
+}
+
+.card-head h1 {
+  color: var(--white);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.card-head p {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+    font-weight: 400;
+}
+
   .btn-custom {
       background-color: #6a0b52;
       color: #fff;
@@ -376,82 +421,81 @@
   }
 </style>
 
-<div class="container-fluid">
-  <!-- === Titre principal === -->
-  <div class="page-title">
-    <h1><i class="fa-solid fa-bell me-2"></i> Mes Notifications</h1>
-  </div>
-
-  @if($notifications->isNotEmpty())
-  <form action="{{ route('notifications.clearAll') }}" method="POST" class="d-inline">
-    @csrf
-    @method('DELETE')
-    <button type="button" id="clear-all-btn" class="btn btn-outline-danger mb-4">
-      <i class="fa-solid fa-trash"></i> Tout supprimer
-    </button>
-  </form>
-  @endif
-
-  <!-- === Liste des notifications === -->
-  <div class="card-style">
-    @forelse($notifications as $notification)
-      <div class="single-notification {{ $notification->read_at ? 'readed' : '' }}">
-        <div class="notification d-flex align-items-start justify-content-between flex-wrap">
-          <div class="content flex-grow-1 me-3">
-            <a href="{{ $notification->data['url'] ?? '#' }}" class="text-decoration-none text-dark read">
-              <h6>{{ $notification->data['message'] ?? 'Notification' }}</h6>
-              @if(isset($notification->data['subtitle']))
-                <p class="text-sm">{{ $notification->data['subtitle'] }}</p>
-              @endif
-            </a>
-            <small class="text-muted d-flex align-items-center flex-wrap">
-              {{ $notification->created_at->format('d/m/Y H:i') }}
-              @if(!$notification->read_at)
-                <span class="badge bg-primary ms-2">Nouveau</span>
-              @endif
-            </small>
-          </div>
-          <div class="action mt-2 mt-md-0">
-            @if(!$notification->read_at)
-              <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-primary" title="Marquer comme lu">
-                  <i class="fa-solid fa-check"></i>
-                </button>
-              </form>
-            @endif
-            @if(isset($notification->data['url']))
-              <a href="{{ $notification->data['url'] . '?notif=' . $notification->id }}" 
-                 class="btn btn-sm read" title="Voir">
-                <i class="fa-solid fa-eye"></i>
-              </a>
-            @endif
-            <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" class="d-inline">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    @empty
-      <div class="alert alert-info text-center py-4">
-        <i class="fa-solid fa-bell-slash fa-3x mb-3 d-block"></i>
-        <h4>Aucune notification</h4>
-        <p class="mb-0">Vous n'avez aucune notification pour le moment.</p>
-      </div>
-    @endforelse
-  </div>
-
-  <!-- Pagination -->
-  @if($notifications->isNotEmpty())
-  <div class="pagination-container d-flex justify-content-center">
-    {{ $notifications->links() }}
-  </div>
-  @endif
+<!-- === Titre principal === -->
+<div class="card-head">
+    <h1>Mes Notifications</h1>
+    <p>Accédez à vos notifications.</p>
 </div>
+
+@if($notifications->isNotEmpty())
+<form action="{{ route('notifications.clearAll') }}" method="POST" class="d-inline">
+@csrf
+@method('DELETE')
+<button type="button" id="clear-all-btn" class="btn btn-outline-danger mb-4">
+    <i class="fa-solid fa-trash"></i> Tout supprimer
+</button>
+</form>
+@endif
+
+<!-- === Liste des notifications === -->
+<div class="card-style">
+@forelse($notifications as $notification)
+    <div class="single-notification {{ $notification->read_at ? 'readed' : '' }}">
+    <div class="notification d-flex align-items-start justify-content-between flex-wrap">
+        <div class="content flex-grow-1 me-3">
+        <a href="{{ $notification->data['url'] ?? '#' }}" class="text-decoration-none text-dark read">
+            <h6>{{ $notification->data['message'] ?? 'Notification' }}</h6>
+            @if(isset($notification->data['subtitle']))
+            <p class="text-sm">{{ $notification->data['subtitle'] }}</p>
+            @endif
+        </a>
+        <small class="text-muted d-flex align-items-center flex-wrap">
+            {{ $notification->created_at->format('d/m/Y H:i') }}
+            @if(!$notification->read_at)
+            <span class="badge bg-primary ms-2">Nouveau</span>
+            @endif
+        </small>
+        </div>
+        <div class="action mt-2 mt-md-0">
+        @if(!$notification->read_at)
+            <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-primary" title="Marquer comme lu">
+                <i class="fa-solid fa-check"></i>
+            </button>
+            </form>
+        @endif
+        @if(isset($notification->data['url']))
+            <a href="{{ $notification->data['url'] . '?notif=' . $notification->id }}" 
+                class="btn btn-sm read" title="Voir">
+            <i class="fa-solid fa-eye"></i>
+            </a>
+        @endif
+        <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+            <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </form>
+        </div>
+    </div>
+    </div>
+@empty
+    <div class="alert alert-info text-center py-4">
+    <i class="fa-solid fa-bell-slash fa-3x mb-3 d-block"></i>
+    <h4>Aucune notification</h4>
+    <p class="mb-0">Vous n'avez aucune notification pour le moment.</p>
+    </div>
+@endforelse
+</div>
+
+<!-- Pagination -->
+@if($notifications->isNotEmpty())
+<div class="pagination-container d-flex justify-content-center">
+{{ $notifications->links() }}
+</div>
+@endif
 @endsection
 
 @push('scripts')

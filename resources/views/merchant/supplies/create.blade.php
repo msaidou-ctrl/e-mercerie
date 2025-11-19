@@ -2,11 +2,9 @@
 
 @section('content')
 <!-- === TITRE PRINCIPAL === -->
-<div class="page-title text-center py-4 py-md-5" style="background: #4F0341; color: #fff;">
-  <div class="container">
-    <h1 class="fw-bold m-0 display-6">Ajouter une Fourniture</h1>
-    <p class="mt-2 mb-0 opacity-75">Gérez votre inventaire de fournitures</p>
-  </div>
+<div class="card-header">
+  <h1>Ajouter une Fourniture</h1>
+  <p>Ajoutez une nouvelle fourniture à votre inventaire</p>
 </div>
 
 <!-- === CONTENU PRINCIPAL === -->
@@ -116,17 +114,6 @@
 .card-style:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-hover);
-}
-
-/* === TYPOGRAPHIE === */
-.page-title h1 {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 800;
-  letter-spacing: -0.5px;
-}
-
-.page-title p {
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 
 /* === FORMULAIRES === */

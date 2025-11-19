@@ -55,6 +55,106 @@ body {
 }
 
 /* =========================================================
+   LOADER DE BIENVENUE
+========================================================= */
+.welcome-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.welcome-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.welcome-logo {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 30px;
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+.welcome-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.3));
+}
+
+.welcome-text {
+  color: var(--text-light);
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.5s forwards;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.loading-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--text-light), var(--accent-color));
+  border-radius: 2px;
+  transition: width 2s ease-in-out;
+  animation: loadingProgress 2s ease-in-out;
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loadingProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* =========================================================
    LOADER & ANIMATIONS
 ========================================================= */
 @keyframes spin {
@@ -117,8 +217,6 @@ header.scrolled {
   height: 72px;
   width: 72px;
 }
-
-
 
 header.scrolled .logo {
   color: var(--primary-color);
@@ -354,7 +452,6 @@ header.scrolled .profile-info:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
   animation: float 20s infinite linear;
 }
 
@@ -1489,6 +1586,17 @@ footer p {
 </head>
 <body>
 
+<!-- Loading de bienvenue -->
+<div id="welcome-loader" class="welcome-loader">
+  <div class="welcome-logo">
+    <img src="{{ asset('images/logo.png') }}" alt="Logo E-mercerie">
+  </div>
+  <div class="welcome-text">Bienvenue sur E-mercerie</div>
+  <div class="loading-bar">
+    <div class="loading-progress"></div>
+  </div>
+</div>
+
 <header id="header">
   <a href="{{ route('landing') }}" class="logo">
     <img src="{{ asset('images/logo.png') }}" alt="">
@@ -1526,11 +1634,19 @@ footer p {
           </div>
         </li>
         <li class="divider"></li>
+        @if(auth()->user()->isCouturier())
+        <li>
+          <a href="{{ route('profile.edit') }}" class="dropdown-item">
+            <i class="fa-solid fa-user"></i> Mon Profile
+          </a>
+        </li>
+        @elseif(auth()->user()->isMercerie())
         <li>
           <a href="{{ route('merceries.profile.edit') }}" class="dropdown-item">
             <i class="fa-solid fa-user"></i> Mon Profile
           </a>
         </li>
+        @endif
         <li>
           @if(auth()->user()->isCouturier())
           <a href="{{ route('merceries.index') }}" class="dropdown-item">
@@ -1580,6 +1696,7 @@ footer p {
   </div>
 </section>
 
+@if(!auth()->user()->isMercerie())
 <section>
   <div class="supplies-container">
     <!-- Titre principal -->
@@ -1595,7 +1712,6 @@ footer p {
         </div>
       </div>
     </div>
-
     <!-- Formulaire -->
     <form id="compare-form" class="supplies-form" action="{{ route('merceries.compare') }}" method="POST">
       @csrf
@@ -1646,7 +1762,7 @@ footer p {
 
             <div class="supply-content">
               <h3>{{ $supply->name }}</h3>
-              <p class="description">{{ $supply->description }}</p>
+              <!-- <p class="description">{{ $supply->description }}</p> -->
 
               <div class="price-qty">
                 <div class="price">
@@ -1727,28 +1843,23 @@ footer p {
     </div>
   </div>
 </section>
+@endif
  
 <section>
   <h2 class="section-title">Liste des Merceries</h2>
-
-  <!-- SEARCH (landing) -->
-  <div class="search-container">
-    <div class="search-wrapper">
-      <div class="search-bar">
-        <i class="fa fa-search"></i>
-        <input id="search-merceries-landing" type="text" placeholder="Ville, Quartier..." autocomplete="off">
-        <div id="merceries-loader-landing" class="loader hidden"></div>
-      </div>
-    </div>
-  </div>
+  @php
+    // Landing always shows the controller-provided collection (already limited to 6)
+    $displayMerceries = $merceries ?? collect();
+    $totalMerceries = $totalMerceries ?? (is_countable($displayMerceries) ? count($displayMerceries) : 0);
+  @endphp
 
   <section class="merceries" id="merceries-container">
-    @if(isset($merceries) && $merceries->isNotEmpty())
-      @foreach($merceries as $m)
+    @if(isset($displayMerceries) && $displayMerceries->isNotEmpty())
+      @foreach($displayMerceries as $m)
         <div class="card">
-          <img src="{{ $m->avatar_url ? asset($m->avatar_url) : 'https://via.placeholder.com/600x300?text=Mercerie' }}" alt="{{ $m->name }}">
+          <img src="{{ $m->avatar_url ? asset($m->avatar_url) : 'https://via.placeholder.com/600x300?text=Mercerie' }}" alt="{{ $m->display_business_name }}">
           <div class="card-content">
-            <h3>{{ $m->name }}</h3>
+            <h3>{{ $m->display_business_name }}</h3>
             <div class="info">
               <div class="location">📍 {{ $m->city }}@if(isset($m->quarter) && $m->quarter) — {{ $m->quarter->name ?? $m->quarter }}@endif</div>
             </div>
@@ -1760,6 +1871,11 @@ footer p {
       <div class="empty-message">Aucune mercerie trouvée pour le moment.</div>
     @endif
   </section>
+  @if($totalMerceries > 6)
+    <div class="text-center mt-4">
+      <a href="{{ route('merceries.index') }}" class="btn btn-primary">Voir plus</a>
+    </div>
+  @endif
 </section>
 
 <footer>
@@ -1771,14 +1887,198 @@ footer p {
   window.LANDING = {
     rootUrl: "{{ url('/') }}",
     routes: {
-      suppliesSearch: "{{ route('api.supplies.search') }}",
-      merceriesSearch: "{{ route('api.merceries.search') }}"
+      suppliesSearch: "{{ route('api.supplies.search') }}"
     },
     assetDefaultImage: "{{ asset('images/default.png') }}",
     csrfToken: "{{ csrf_token() }}"
   };
 </script>
 <script src="{{ asset('js/landing.js') }}"></script>
+
+<script>
+// Gestion du loading de bienvenue
+document.addEventListener('DOMContentLoaded', function() {
+  const welcomeLoader = document.getElementById('welcome-loader');
+  
+  // Masquer le loader après 2.5 secondes
+  setTimeout(() => {
+    if (welcomeLoader) {
+      welcomeLoader.classList.add('hidden');
+      
+      // Supprimer complètement le loader du DOM après l'animation
+      setTimeout(() => {
+        welcomeLoader.remove();
+      }, 800);
+    }
+  }, 2500);
+});
+
+// HEADER SCROLL EFFECT
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// FADE-IN ON SCROLL
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.card').forEach(c => observer.observe(c));
+
+// GESTION DES CONTRÔLES DE QUANTITÉ AVEC BOUTONS +/-
+document.addEventListener('DOMContentLoaded', function() {
+  // Fonction pour mettre à jour la valeur
+  function updateQuantity(input, change, isMeasure = false, step = 1) {
+    let currentValue;
+    
+    if (isMeasure) {
+      // Pour les mesures, on gère les décimales
+      currentValue = parseFloat(input.value) || 0;
+      const newValue = Math.max(0, currentValue + (change * step));
+      input.value = newValue.toFixed(1);
+    } else {
+      // Pour les quantités, on gère les entiers
+      currentValue = parseInt(input.value) || 0;
+      const newValue = Math.max(0, currentValue + change);
+      input.value = newValue;
+    }
+    
+    // Animation de feedback
+    input.classList.add('updated');
+    setTimeout(() => input.classList.remove('updated'), 300);
+    
+    // Mise à jour de l'état des boutons
+    updateButtonStates(input, isMeasure);
+  }
+  
+  // Fonction pour mettre à jour l'état des boutons
+  function updateButtonStates(input, isMeasure) {
+    const value = isMeasure ? parseFloat(input.value) : parseInt(input.value);
+    const container = input.closest('.quantity-controls');
+    const minusBtn = container?.querySelector('.quantity-btn.minus');
+    
+    if (minusBtn) {
+      minusBtn.disabled = value <= 0;
+    }
+  }
+  
+  // Gestion des clics sur les boutons +/-
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.quantity-btn')) {
+      const btn = e.target.closest('.quantity-btn');
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      
+      if (input) {
+        const isMeasure = input.dataset.measure === 'true';
+        const step = parseFloat(btn.dataset.step) || 1;
+        const isPlus = btn.classList.contains('plus');
+        
+        updateQuantity(input, isPlus ? 1 : -1, isMeasure, step);
+        
+        // Déclencher l'événement change pour les écouteurs existants
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  });
+  
+  // Validation des inputs
+  document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('quantity-input')) {
+      const input = e.target;
+      const isMeasure = input.dataset.measure === 'true';
+      
+      if (isMeasure) {
+        // Validation pour les mesures (nombres décimaux)
+        let value = parseFloat(input.value);
+        if (isNaN(value) || value < 0) {
+          input.value = '0';
+        } else {
+          input.value = value.toFixed(1);
+        }
+      } else {
+        // Validation pour les quantités (nombres entiers)
+        let value = parseInt(input.value);
+        if (isNaN(value) || value < 0) {
+          input.value = '0';
+        } else {
+          input.value = value;
+        }
+      }
+      
+      updateButtonStates(input, isMeasure);
+    }
+  });
+  
+  // Initialisation de l'état des boutons
+  document.querySelectorAll('.quantity-input').forEach(input => {
+    const isMeasure = input.dataset.measure === 'true';
+    updateButtonStates(input, isMeasure);
+  });
+
+  // BOUTON DE RÉINITIALISATION AMÉLIORÉ
+  const resetBtn = document.getElementById('reset-supplies-values');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      // Réinitialiser tous les champs quantité et mesure
+      document.querySelectorAll('.quantity-input').forEach(input => {
+        input.value = '0';
+        
+        // Mettre à jour l'état des boutons
+        const isMeasure = input.dataset.measure === 'true';
+        updateButtonStates(input, isMeasure);
+        
+        // Animation de feedback
+        input.classList.add('updated');
+        setTimeout(() => input.classList.remove('updated'), 300);
+      });
+      
+      // Animation de succès sur le bouton
+      resetBtn.classList.add('success');
+      setTimeout(() => resetBtn.classList.remove('success'), 1000);
+      
+      // Feedback visuel
+      const originalText = resetBtn.innerHTML;
+      resetBtn.innerHTML = '<i class="fas fa-check"></i> Valeurs réinitialisées !';
+      setTimeout(() => {
+        resetBtn.innerHTML = originalText;
+      }, 2000);
+    });
+  }
+
+  // GESTION DU LOADER DE COMPARAISON
+  const compareForm = document.getElementById('compare-form');
+  const compareLoader = document.getElementById('compare-loader');
+  const submitBtn = compareForm ? compareForm.querySelector('.submit-btn') : null;
+
+  // Compare form loader
+  if (compareForm && compareLoader && submitBtn) {
+    compareForm.addEventListener('submit', function (e) {
+      // Afficher le loader
+      compareLoader.classList.remove('hidden');
+      
+      // Désactiver le bouton pour éviter les doubles soumissions
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.7';
+      submitBtn.style.cursor = 'not-allowed';
+      
+      // Optionnel: Ajouter un délai minimal pour que l'utilisateur voie le loader
+      setTimeout(() => {
+        // Le formulaire continue sa soumission normale
+        // Le loader restera visible jusqu'au rechargement de la page
+      }, 500);
+    });
+  }
+
+  // LIVE SEARCH FOR LANDING
+  // Mercerie live-search and pagination have been removed from the landing page.
+});
+</script>
 
 </body>
 </html>

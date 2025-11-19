@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SupplyController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MerchantSupplyController;
@@ -93,9 +94,11 @@ Route::middleware('auth')->group(function () {
 
     });
 
-    // Generic profile edit for any authenticated user (couturier or mercerie)
-    Route::get('/profile/edit', [MerchantController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [MerchantController::class, 'updateProfile'])->name('profile.update');
+    // Routes génériques pour tous les utilisateurs
+    Route::middleware('auth')->group(function() {
+        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    });
 
     Route::prefix('merchant')->name('merchant.')->middleware('auth', 'role:mercerie')->group(function() {
         Route::post('/orders/{id}/accept', [OrderController::class, 'accept'])->name('orders.accept');

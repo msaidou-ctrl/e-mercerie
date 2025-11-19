@@ -12,6 +12,51 @@
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
+.card-head {
+    background: linear-gradient(135deg, #4F0341, #7a1761);;
+    color: #fff;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border-bottom: none;
+    border-radius: 10px !important;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.card-head::before {
+    content: '';
+    position: absolute;
+    border-radius: 50px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    animation: float 20s infinite linear;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-100px) rotate(360deg); }
+}
+
+.card-head h1 {
+  color: var(--white);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.card-head p {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+    font-weight: 400;
+}
+
 
 /* === CONTENEUR PRINCIPAL === */
 .card-style {
@@ -124,8 +169,9 @@ input:focus {
 </style>
 
 <!-- === EN-TÊTE === -->
-<div class="page-title">
+<div class="card-head">
     <h1>Modifier la Fourniture</h1>
+    <p>Modifiez les détails de votre fourniture ci-dessous</p>
 </div>
 
 <!-- === CONTENU PRINCIPAL === -->
@@ -161,11 +207,11 @@ input:focus {
                    value="{{ $merchantSupply->stock_quantity }}" required>
         </div>
 
-        <div class="mb-4">
+        <!-- <div class="mb-4">
             <label>Mesure (définie par l'administrateur)</label>
             <input type="text" id="measure" value="{{ $merchantSupply->measure ?? ($merchantSupply->supply->measure ?? '') }}" disabled class="form-control" />
             <small class="text-muted">Cette valeur est déterminée par l'administrateur et n'est pas modifiable par la mercerie.</small>
-        </div>
+        </div> -->
 
         <div class="mb-3">
             <label class="form-label">Mode de vente</label>

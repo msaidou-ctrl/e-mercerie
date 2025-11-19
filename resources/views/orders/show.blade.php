@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="order-details-container">
-    <div class="page-title">
+    <div class="card-header">
         <h1>Détails de la commande #{{ $order->id }}</h1>
     </div>
 

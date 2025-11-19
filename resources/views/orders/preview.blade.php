@@ -501,7 +501,7 @@
 
 <div class="container my-5">
     <!-- Titre principal -->
-    <div class="page-title">
+    <div class="card-header">
         <h1>
             Prévisualisation de la commande
             <span class="mercerie-name">{{ $mercerie->name }}</span>

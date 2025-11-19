@@ -512,15 +512,21 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('merceries.profile.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
                         <!-- Section Avatar -->
                         <div class="form-section avatar-section">
                             <div class="avatar-container">
+                                @php
+                                    $avatarTimestamp = null;
+                                    if (!empty($mercerie->avatar) && file_exists(storage_path('app/public/' . $mercerie->avatar))) {
+                                        $avatarTimestamp = filemtime(storage_path('app/public/' . $mercerie->avatar));
+                                    }
+                                @endphp
                                 <img id="avatarPreview" 
-                                     src="{{ $mercerie->avatar ? asset('storage/' . $mercerie->avatar) : asset('images/defaults/mercerie-avatar.png') }}"
+                                     src="{{ $mercerie->avatar ? asset('storage/' . $mercerie->avatar) . ($avatarTimestamp ? '?v=' . $avatarTimestamp : '') : asset('images/defaults/mercerie-avatar.png') }}"
                                      alt="Avatar de la mercerie"
                                      class="avatar-img">
                                 
@@ -538,6 +544,20 @@
 
                         <!-- Section Localisation -->
                         <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fa-solid fa-store me-2 text-primary"></i>
+                                Informations de la mercerie
+                            </h5>
+                            <div class="mb-3">
+                                <label for="business_name" class="form-label">Appellation exacte de la mercerie *</label>
+                                <input id="business_name" name="business_name" type="text" required
+                                       value="{{ old('business_name', $mercerie->business_name) }}"
+                                       class="form-control @error('business_name') is-invalid @enderror">
+                                @error('business_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <h5 class="section-title">
                                 <i class="fa-solid fa-location-dot me-2 text-primary"></i>
                                 Localisation

@@ -8,11 +8,11 @@
 
 <div class="supplies-container">
     <!-- Barre d'action -->
-    <div class="header-section">
+    <!-- <div class="header-section">
         <a href="{{ route('supplies.selection') }}" class="soft-btn light">
             <i class="fas fa-arrow-left"></i> Retour
         </a>
-    </div>
+    </div> -->
 
     <!-- Barre de recherche -->
     <div class="search-wrapper">
@@ -36,9 +36,9 @@
 
                     <div class="supply-content">
                         <h3>{{ $supply->supply->name }}</h3>
-                        <p class="description">
+                        <!-- <p class="description">
                             {{ Str::limit($supply->supply->description ?? 'Aucune description disponible.', 100) }}
-                        </p>
+                        </p> -->
 
                         <div class="price-stock mb-3">
                             <div class="price">

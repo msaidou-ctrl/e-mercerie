@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Supply;
+use Illuminate\Support\Facades\Storage;
 
 class MerchantController extends Controller
 {
@@ -13,12 +14,14 @@ class MerchantController extends Controller
     {
         $search = $request->input('search');
 
+    $perPage = 12;
+
         $merceries = User::where('role', 'mercerie')
             ->where('id', '!=', auth()->id()) // exclure la mercerie connectée
             ->whereHas('merchantSupplies')   // au moins une fourniture
             ->when($search, function ($query, $search) {
                                 $query->where(function ($q) use ($search) {
-                                        $q->where('name', 'like', "%{$search}%")
+                                            $q->where('business_name', 'like', "%{$search}%")
                                             ->orWhere('email', 'like', "%{$search}%")
                                             ->orWhere('phone', 'like', "%{$search}%");
 
@@ -34,7 +37,8 @@ class MerchantController extends Controller
                                 });
             })
             ->with(['merchantSupplies','cityModel','quarter'])
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('couturier.merceries.index', compact('merceries', 'search'));
     }
@@ -44,37 +48,26 @@ class MerchantController extends Controller
      */
     public function landing(Request $request)
     {
-        $search = $request->input('search');
+        $perPageMerceries = 12; // kept for supplies pagination
 
+        // Default landing: show the 6 latest merceries that have at least one supply
         $merceries = User::where('role', 'mercerie')
             ->whereHas('merchantSupplies')
             ->when(auth()->check(), function ($q) {
                 $q->where('id', '!=', auth()->id());
             })
-            ->when($search, function ($query, $search) {
-                                $query->where(function ($q) use ($search) {
-                                        $q->where('name', 'like', "%{$search}%")
-                                            ->orWhere('phone', 'like', "%{$search}%");
-
-                    // Search by related city name
-                    $q->orWhereHas('cityModel', function ($qc) use ($search) {
-                        $qc->where('name', 'like', "%{$search}%");
-                    });
-
-                    // Search by related quarter name
-                    $q->orWhereHas('quarter', function ($qq) use ($search) {
-                        $qq->where('name', 'like', "%{$search}%");
-                    });
-                                });
-            })
             ->with(['merchantSupplies','cityModel','quarter'])
+            ->orderByDesc('created_at')
+            ->take(6)
             ->get();
 
-    // Also pass available supplies so landing can show selection form
-    // Use pagination to avoid rendering thousands of supplies on the landing page
-    $perPage = 5;
-    $supplies = Supply::orderBy('name')->paginate($perPage)->withQueryString();
-    return view('landing', compact('merceries', 'search', 'supplies'));
+        // Total count of merceries with supplies (used to decide whether to show "Voir plus")
+        $totalMerceries = User::where('role', 'mercerie')->whereHas('merchantSupplies')->count();
+
+        // Also pass available supplies so landing can show selection form
+        $perPage = 10;
+        $supplies = Supply::orderBy('name')->paginate($perPage)->withQueryString();
+        return view('landing', compact('merceries', 'supplies', 'totalMerceries'));
     }
 
     public function searchAjax(Request $request)
@@ -91,7 +84,7 @@ class MerchantController extends Controller
             // Apply search filter when provided
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($sub) use ($query) {
-                    $sub->where('name', 'like', "%{$query}%")
+                    $sub->where('business_name', 'like', "%{$query}%")
                             ->orWhere('email', 'like', "%{$query}%")
                             ->orWhere('phone', 'like', "%{$query}%");
 
@@ -108,12 +101,11 @@ class MerchantController extends Controller
             })
             ->with(['merchantSupplies','cityModel','quarter'])
             ->get();
-
         // Map response to include avatar_url and a short description
         $payload = $merceries->map(function ($m) {
             return [
                 'id' => $m->id,
-                'name' => $m->name,
+                'name' => $m->display_business_name,
                 'city' => $m->city,
                 'quarter' => $m->quarter?->name ?? null,
                 'phone' => $m->phone,
@@ -163,6 +155,7 @@ class MerchantController extends Controller
         // Role-specific validation: merceries must provide city/quarter; couturiers may not
         if ($user->isMercerie()) {
             $rules = [
+                'business_name' => 'required|string|max:255',
                 'city_id' => 'required|exists:cities,id',
                 'quarter_id' => 'required|exists:quarters,id',
                 'phone' => 'nullable|string|max:20',
@@ -192,11 +185,20 @@ class MerchantController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
+            // Delete previous avatar file if present
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
             $path = $request->file('avatar')->store('avatars', 'public');
             $data['avatar'] = $path;
         }
 
         // Map city_id/quarter_id to user's columns
+        // Save merchant business name
+        if ($user->isMercerie()) {
+            $user->business_name = $data['business_name'] ?? $user->business_name;
+        }
         $user->city_id = $data['city_id'] ?? null;
         $user->quarter_id = $data['quarter_id'] ?? null;
         $user->phone = $data['phone'] ?? $user->phone;
@@ -211,7 +213,7 @@ class MerchantController extends Controller
             return redirect()->route('merchant.supplies.index')->with('success', 'Profil complété avec succès.');
         }
 
-        return redirect()->route('supplies.selection')->with('success', 'Profil mis à jour avec succès.');
+        return redirect()->back()->with('success', 'Profil mis à jour avec succès.');
     }
 
 }

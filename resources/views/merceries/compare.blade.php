@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="compare-container">
-    <div class="page-title">
+    <div class="card-header">
         <h1>Comparaison des merceries</h1>
     </div>
 

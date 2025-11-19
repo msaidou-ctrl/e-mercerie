@@ -14,6 +14,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $fillable = [
         'name',
+        'business_name',
         'email',
         'password',
         'role',
@@ -37,6 +38,14 @@ class User extends Authenticatable implements MustVerifyEmail
             return asset($this->avatar);
         }
         return asset('images/avatars/default.png');
+    }
+
+    /**
+     * Return the business name if set, otherwise fallback to name
+     */
+    public function getDisplayBusinessNameAttribute()
+    {
+        return $this->business_name ?: $this->name;
     }
 
 
