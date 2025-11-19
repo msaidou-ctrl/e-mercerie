@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Supply;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class MerchantController extends Controller
 {
@@ -185,13 +186,32 @@ class MerchantController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
-            // Delete previous avatar file if present
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
+            try {
+                // Delete previous avatar file if present
+                if ($user->avatar) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                $avatarFile = $request->file('avatar');
+                $path = $avatarFile->store('avatars', 'public');
+                $data['avatar'] = $path;
+            } catch (\Throwable $e) {
+                // Log detailed error for production debugging and continue without blocking the whole request
+                $avatarFile = $avatarFile ?? null;
+                Log::error('Failed to process avatar upload for user id ' . ($user->id ?? 'n/a') . ': ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'user_id' => $user->id ?? null,
+                    'file_info' => $avatarFile ? [
+                        'originalName' => $avatarFile->getClientOriginalName(),
+                        'size' => $avatarFile->getSize(),
+                        'mime' => $avatarFile->getMimeType() ?? null,
+                    ] : null,
+                ]);
 
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $data['avatar'] = $path;
+                // Remove avatar key so we don't overwrite existing avatar with null
+                unset($data['avatar']);
+                // Optionally flash a warning for the user (kept minimal in production)
+                session()->flash('error', 'Impossible d\'uploader l\'avatar — veuillez réessayer plus tard.');
+            }
         }
 
         // Map city_id/quarter_id to user's columns
@@ -206,7 +226,12 @@ class MerchantController extends Controller
         if (isset($data['avatar'])) {
             $user->avatar = $data['avatar'];
         }
-        $user->save();
+        try {
+            $user->save();
+        } catch (\Throwable $e) {
+            Log::error('Failed to save updated profile for user id ' . ($user->id ?? 'n/a') . ': ' . $e->getMessage(), ['exception' => $e, 'user_id' => $user->id ?? null]);
+            return redirect()->back()->withInput()->with('error', 'Une erreur est survenue lors de la mise à jour du profil.');
+        }
 
         // Redirect depending on role
         if ($user->isMercerie()) {
