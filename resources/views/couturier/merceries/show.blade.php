@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- 🔹 En-tête principale pleine largeur -->
-<div class="page-title text-center py-4">
+<div class="card-header">
     <h1>{{ $mercerie->name }}</h1>
 </div>
 

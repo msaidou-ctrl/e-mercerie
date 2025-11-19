@@ -495,7 +495,7 @@
             <div class="profile-card">
                 <!-- En-tête de la carte -->
                 <div class="card-header">
-                    <h4>Mon profil mercerie</h4>
+                    <h1>Mon profil mercerie</h1>
                     <p>Mettez à jour vos informations personnelles</p>
                 </div>
 
@@ -544,10 +544,10 @@
 
                         <!-- Section Localisation -->
                         <div class="form-section">
-                            <h5 class="section-title">
+                            <!-- <h5 class="section-title">
                                 <i class="fa-solid fa-store me-2 text-primary"></i>
                                 Informations de la mercerie
-                            </h5>
+                            </h5> -->
                             <div class="mb-3">
                                 <label for="business_name" class="form-label">Appellation exacte de la mercerie *</label>
                                 <input id="business_name" name="business_name" type="text" required
@@ -558,15 +558,15 @@
                                 @enderror
                             </div>
 
-                            <h5 class="section-title">
+                            <!-- <h5 class="section-title">
                                 <i class="fa-solid fa-location-dot me-2 text-primary"></i>
                                 Localisation
-                            </h5>
+                            </h5> -->
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="city_id" class="form-label">
                                         <i class="fa-solid fa-city me-1 text-muted"></i>
-                                        Ville
+                                        Ville*
                                     </label>
                                     <select id="city_id" name="city_id" class="form-select @error('city_id') is-invalid @enderror" required>
                                         <option value="">Sélectionnez une ville...</option>
@@ -586,7 +586,7 @@
                                 <div class="col-md-6">
                                     <label for="quarter_id" class="form-label">
                                         <i class="fa-solid fa-map-marker-alt me-1 text-muted"></i>
-                                        Quartier
+                                        Quartier*
                                     </label>
                                     <select id="quarter_id" name="quarter_id" class="form-select @error('quarter_id') is-invalid @enderror" required>
                                         <option value="">Sélectionnez d'abord une ville</option>
@@ -602,15 +602,15 @@
 
                         <!-- Section Contact -->
                         <div class="form-section">
-                            <h5 class="section-title">
+                            <!-- <h5 class="section-title">
                                 <i class="fa-solid fa-address-book me-2 text-primary"></i>
                                 Informations de contact
-                            </h5>
+                            </h5> -->
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label for="phone" class="form-label">
                                         <i class="fa-solid fa-phone me-1 text-muted"></i>
-                                        Numéro de téléphone
+                                        Numéro de téléphone*
                                     </label>
                                     <input type="text" id="phone" name="phone" 
                                            class="form-control @error('phone') is-invalid @enderror"
@@ -632,7 +632,7 @@
                                               class="form-control @error('address') is-invalid @enderror"
                                               rows="3" 
                                               placeholder="Entrez votre adresse complète (rue, numéro, repères, etc.)" 
-                                              required>{{ old('address', $mercerie->address ?? '') }}</textarea>
+                                              >{{ old('address', $mercerie->address ?? '') }}</textarea>
                                     @error('address')
                                         <div class="invalid-feedback">
                                             <i class="fa-solid fa-exclamation-circle me-1"></i>{{ $message }}

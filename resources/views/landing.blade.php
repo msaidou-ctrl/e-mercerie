@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- CSRF token + WebPush public key for client-side subscription -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="shortcut icon" href="{{ asset('images/logo.jpeg') }}" type="image/x-icon" />
   <meta name="webpush-public-key" content="{{ config('webpush.vapid.public') ?? config('services.webpush.public') }}">
-<title>Liste des Merceries – Prodmast</title>
+<title>E-mercerie</title>
 <style>
 /* =========================================================
    GLOBAL — RESET, FONTS, VARIABLES
@@ -1678,11 +1679,11 @@ footer p {
     <p>Découvrez les meilleures merceries de votre région et leurs produits uniques.</p>
     <div class="hero-buttons">
       @auth
-        @if(auth()->user()->isMercerie())
+        @if(auth()->check() && auth()->user()->isMercerie())
           <a href="{{ route('merchant.supplies.index') }}" class="btn btn-primary">
             <i class="fas fa-plus-circle"></i> Ajouter une fourniture
           </a>
-        @elseif(auth()->user()->isCouturier())
+          @elseif(auth()->check() && auth()->user()->isCouturier())
           <a href="{{ route('merceries.index') }}" class="btn btn-primary">
             Consulter des Merceries
           </a>
@@ -1696,7 +1697,7 @@ footer p {
   </div>
 </section>
 
-@if(!auth()->user()->isMercerie())
+@if(!auth()->check() || !auth()->user()->isMercerie())
 <section>
   <div class="supplies-container">
     <!-- Titre principal -->
