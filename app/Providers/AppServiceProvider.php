@@ -52,21 +52,37 @@ class AppServiceProvider extends ServiceProvider
         // Invalidate the cached cities_with_quarters_v1 when cities or quarters change
         try {
             City::saved(function () {
-                Cache::forget('cities_with_quarters_v1');
-                logger()->info('Cleared cache: cities_with_quarters_v1 (City saved)');
+                try {
+                    Cache::forget('cities_with_quarters_v1');
+                    logger()->info('Cleared cache: cities_with_quarters_v1 (City saved)');
+                } catch (\Exception $e) {
+                    logger()->warning('Failed to clear cache cities_with_quarters_v1 (City saved): ' . $e->getMessage());
+                }
             });
             City::deleted(function () {
-                Cache::forget('cities_with_quarters_v1');
-                logger()->info('Cleared cache: cities_with_quarters_v1 (City deleted)');
+                try {
+                    Cache::forget('cities_with_quarters_v1');
+                    logger()->info('Cleared cache: cities_with_quarters_v1 (City deleted)');
+                } catch (\Exception $e) {
+                    logger()->warning('Failed to clear cache cities_with_quarters_v1 (City deleted): ' . $e->getMessage());
+                }
             });
 
             Quarter::saved(function () {
-                Cache::forget('cities_with_quarters_v1');
-                logger()->info('Cleared cache: cities_with_quarters_v1 (Quarter saved)');
+                try {
+                    Cache::forget('cities_with_quarters_v1');
+                    logger()->info('Cleared cache: cities_with_quarters_v1 (Quarter saved)');
+                } catch (\Exception $e) {
+                    logger()->warning('Failed to clear cache cities_with_quarters_v1 (Quarter saved): ' . $e->getMessage());
+                }
             });
             Quarter::deleted(function () {
-                Cache::forget('cities_with_quarters_v1');
-                logger()->info('Cleared cache: cities_with_quarters_v1 (Quarter deleted)');
+                try {
+                    Cache::forget('cities_with_quarters_v1');
+                    logger()->info('Cleared cache: cities_with_quarters_v1 (Quarter deleted)');
+                } catch (\Exception $e) {
+                    logger()->warning('Failed to clear cache cities_with_quarters_v1 (Quarter deleted): ' . $e->getMessage());
+                }
             });
         } catch (\Exception $e) {
             // Non-fatal: just log the listener wiring failure
