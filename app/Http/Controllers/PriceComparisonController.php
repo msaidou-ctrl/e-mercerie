@@ -87,8 +87,9 @@ class PriceComparisonController extends Controller
         }
 
         $merceries = $merceriesQuery->get();
-        $disponibles = [];
-        $non_disponibles = [];
+    $disponibles = [];
+    $partiels = []; // merceries ayant au moins une fourniture mais pas toutes
+    $non_disponibles = [];
 
         // helper: parse measure string into meters (float). supports m, cm, mm. returns null if not numeric
         $parseMeasureToMeters = function (?string $str) {
@@ -185,11 +186,24 @@ class PriceComparisonController extends Controller
                 'quarter_name' => $mercerie->quarter?->name ?? null,
             ];
 
-            if ($peut_fournir) {
+            // Determine how many requested items were satisfied
+            $requestedCount = count($items);
+            // number of provided items by this merchant (details length)
+            $providedCount = count($details);
+
+            if ($providedCount === $requestedCount && $peut_fournir) {
                 $disponibles[] = [
                     'mercerie' => $mercerieInfo,
                     'total_estime' => $total,
                     'details' => $details,
+                ];
+            } elseif ($providedCount > 0) {
+                // Partiellement disponible: a au moins une fourniture mais pas toutes
+                $partiels[] = [
+                    'mercerie' => $mercerieInfo,
+                    'details' => $details,
+                    'raisons' => $raisons,
+                    'total_estime' => $total,
                 ];
             } else {
                 $non_disponibles[] = [
@@ -208,6 +222,7 @@ class PriceComparisonController extends Controller
 
     // Store results in session and redirect to GET route (Post-Redirect-Get) so guests can be redirected to this GET URL after login
     $request->session()->put('compare.disponibles', $disponibles);
+    $request->session()->put('compare.partiels', $partiels);
     $request->session()->put('compare.non_disponibles', $non_disponibles);
     $request->session()->put('compare.items', $items);
     $request->session()->put('compare.selectedCity', $selectedCity);
@@ -224,12 +239,13 @@ class PriceComparisonController extends Controller
     {
         // Retrieve previously computed results from session without removing them
         $disponibles = $request->session()->get('compare.disponibles', []);
-        $non_disponibles = $request->session()->get('compare.non_disponibles', []);
+    $partiels = $request->session()->get('compare.partiels', []);
+    $non_disponibles = $request->session()->get('compare.non_disponibles', []);
         $items = $request->session()->get('compare.items', []);
         $selectedCity = $request->session()->get('compare.selectedCity', null);
         $selectedQuarter = $request->session()->get('compare.selectedQuarter', null);
 
-        return view('merceries.compare', compact('disponibles', 'non_disponibles', 'items', 'selectedCity', 'selectedQuarter'));
+        return view('merceries.compare', compact('disponibles', 'partiels', 'non_disponibles', 'items', 'selectedCity', 'selectedQuarter'));
     }
 
 }

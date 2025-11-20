@@ -32,6 +32,43 @@
     padding: 20px;
     color: #333;
     overflow-x: hidden;
+    position: relative;
+  }
+
+  /* LOGO STYLES */
+  .logo-container {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    text-align: center;
+  }
+
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-light);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .logo:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .logo img {
+    width: 82px;
   }
 
   .container {
@@ -45,6 +82,8 @@
     flex-wrap: wrap;
     animation: fadeIn 1s ease;
     min-height: 500px;
+    position: relative;
+    margin-top: 40px; /* Espace pour le logo */
   }
 
   .form-container {
@@ -105,6 +144,7 @@
     justify-content: center;
     animation: slideInRight 1.2s ease forwards;
     min-height: 300px;
+    position: relative;
   }
 
   .illustration img {
@@ -181,8 +221,20 @@
   }
 
   /* =========================================================
-     RESPONSIVE DESIGN OPTIMISÉ
+     RESPONSIVE DESIGN OPTIMISÉ AVEC EMPILEMENT MOBILE
   ========================================================= */
+
+  /* DESKTOP & TABLETTES (≥ 851px) */
+  @media (min-width: 851px) {
+    .logo-container {
+      top: 30px;
+    }
+    
+    .logo {
+      font-size: 2rem;
+      padding: 10px 20px;
+    }
+  }
 
   /* GRANDES TABLETTES (≤ 1024px) */
   @media (max-width: 1024px) {
@@ -210,6 +262,7 @@
       flex-direction: column;
       max-width: 600px;
       border-radius: 16px;
+      margin-top: 60px; /* Plus d'espace pour le logo */
     }
 
     .illustration {
@@ -252,15 +305,60 @@
     }
   }
 
-  /* SMARTPHONES LARGE (≤ 650px) */
+  /* SMARTPHONES LARGE (≤ 650px) - EMPILEMENT COMPLET */
   @media (max-width: 650px) {
     body {
       padding: 10px;
+      display: block;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .logo-container {
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      margin: 20px auto;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      padding: 8px 16px;
+      display: inline-flex;
     }
 
     .container {
+      padding: 20px;
       border-radius: 14px;
       min-height: auto;
+      margin: 0 auto 20px;
+      max-width: 100%;
+      flex-direction: column;
+      order: 3; /* Le formulaire vient après l'image */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Réorganisation de l'ordre d'affichage */
+    .logo-container {
+      order: 1;
+    }
+
+    .illustration {
+      order: 2;
+      margin: 0 auto 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 300px;
+      min-height: 200px;
+      background: linear-gradient(135deg, #a84aff, #ff3fbf);
+    }
+
+    .form-container {
+      order: 3;
+      padding: 25px 20px;
     }
 
     .form-container h1 {
@@ -286,7 +384,7 @@
 
     input {
       padding: 12px;
-      font-size: 16px; /* Améliore l'accessibilité sur mobile */
+      font-size: 16px;
       margin-bottom: 20px;
     }
 
@@ -304,15 +402,16 @@
   @media (max-width: 480px) {
     body {
       padding: 8px;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding-top: 20px;
-      padding-bottom: 20px;
+      padding-top: 10px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      padding: 6px 14px;
     }
 
     .container {
       border-radius: 12px;
-      max-width: 100%;
     }
 
     .form-container {
@@ -325,12 +424,15 @@
     }
 
     .illustration {
-      padding: 20px 0;
       min-height: 180px;
+      max-width: 260px;
+      margin: 0 auto 15px;
     }
 
     .illustration img {
-      max-width: 220px;
+      max-width: 200px;
+      height: 100%;
+      object-fit: contain;
     }
 
     input {
@@ -362,6 +464,11 @@
       padding: 5px;
     }
 
+    .logo {
+      font-size: 1.4rem;
+      padding: 5px 12px;
+    }
+
     .container {
       border-radius: 10px;
     }
@@ -378,10 +485,11 @@
     .illustration {
       padding: 15px 0;
       min-height: 150px;
+      max-width: 220px;
     }
 
     .illustration img {
-      max-width: 180px;
+      max-width: 160px;
     }
 
     input {
@@ -407,12 +515,21 @@
   @media (max-height: 500px) and (orientation: landscape) {
     body {
       padding: 10px;
+      display: flex;
       align-items: flex-start;
     }
 
+    .logo-container {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
     .container {
-      max-height: 90vh;
+      max-height: 80vh;
       overflow-y: auto;
+      margin-top: 50px;
     }
 
     .form-container {
@@ -420,7 +537,7 @@
     }
 
     .illustration {
-      min-height: 200px;
+      min-height: 180px;
       padding: 15px 0;
     }
   }
@@ -434,7 +551,6 @@
 
   /* MODE SOMBRE (respecte les préférences utilisateur) */
   @media (prefers-color-scheme: dark) {
-    /* Garde les couleurs originales mais améliore le contraste */
     .container {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     }
@@ -472,13 +588,19 @@
   /* Focus visible pour l'accessibilité */
   button:focus-visible,
   input:focus-visible,
-  .pw-toggle:focus-visible {
+  .pw-toggle:focus-visible,
+  .logo:focus-visible {
     outline: 2px solid var(--main-color);
     outline-offset: 2px;
   }
 </style>
 </head>
 <body>
+
+<!-- Logo en haut qui redirige vers l'accueil -->
+<div class="logo-container">
+  <a href="{{ route('landing') }}" class="logo"><img src="{{ asset('images/logo.jpeg') }}" alt="E-mercerie"></a>
+</div>
 
 <div class="container">
   <div class="form-container">
@@ -554,6 +676,13 @@
     const firstInput = document.querySelector('input[type="email"]');
     if (firstInput) {
       setTimeout(() => firstInput.focus(), 300);
+    }
+
+    // Animation douce pour le scroll sur mobile
+    if (window.innerWidth <= 650) {
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
     }
   });
 </script>

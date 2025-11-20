@@ -488,9 +488,16 @@ document.addEventListener('DOMContentLoaded', function() {
         data: params => ({ q: params.term }),
         processResults: data => ({ results: data.results })
       },
-      templateResult: supply => supply.loading ? 
-        '<div class="text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Recherche...</div>' : 
-        $('<div class="d-flex align-items-center"><i class="fa-solid fa-box me-2 text-primary"></i><span>' + supply.text + '</span></div>'),
+      templateResult: supply => {
+        if (supply.loading) return '<div class="text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Recherche...</div>';
+  const img = supply.image_url ? '<img src="' + supply.image_url + '" style="width:64px;height:64px;object-fit:cover;border-radius:8px;margin-right:12px;"/>' : '<i class="fa-solid fa-box me-2 text-primary" style="width:64px;text-align:center;font-size:22px;color:#6b7280"></i>';
+        return $('<div class="d-flex align-items-center">' + img + '<div><div style="font-weight:600">' + supply.text + '</div><div style="font-size:0.85rem;color:#6b7280">' + (supply.description || '') + '</div></div></div>');
+      },
+      templateSelection: supply => {
+        if (!supply || !supply.id) return supply.text || '';
+  const img = supply.image_url ? '<img src="' + supply.image_url + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-right:10px;vertical-align:middle;"/>' : '';
+  return $('<span style="display:inline-flex;align-items:center;gap:8px;">' + img + '<span>' + (supply.text || supply.name) + '</span></span>');
+      },
       escapeMarkup: markup => markup
     });
   }

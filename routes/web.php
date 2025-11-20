@@ -129,6 +129,8 @@ Route::middleware('auth')->group(function () {
     // Admin routes for managing supplies
     Route::prefix('admin')->middleware('auth', 'role:admin')->name('admin.')->group(function () {
         Route::get('/supplies', [\App\Http\Controllers\Admin\AdminSupplyController::class, 'index'])->name('supplies.index');
+        Route::get('/merceries', [\App\Http\Controllers\Admin\MerceriesController::class, 'index'])->name('merceries.index');
+        Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
         Route::get('/supplies/create', [\App\Http\Controllers\Admin\AdminSupplyController::class, 'create'])->name('supplies.create');
         Route::post('/supplies', [\App\Http\Controllers\Admin\AdminSupplyController::class, 'store'])->name('supplies.store');
         Route::get('/supplies/{id}/edit', [\App\Http\Controllers\Admin\AdminSupplyController::class, 'edit'])->name('supplies.edit');

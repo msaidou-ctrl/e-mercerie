@@ -1657,6 +1657,10 @@ footer p {
           <a href="{{ route('orders.index') }}" class="dropdown-item">
             <i class="fa-solid fa-gauge"></i> Tableau de bord
           </a>
+          @elseif(auth()->user()->isAdmin())
+          <a href="{{ route('admin.supplies.index') }}" class="dropdown-item">
+            <i class="fa-solid fa-gauge"></i> Tableau de bord
+          </a>
           @endif
         </li>
         <li class="divider"></li>
@@ -2062,13 +2066,9 @@ document.addEventListener('DOMContentLoaded', function() {
     compareForm.addEventListener('submit', function (e) {
       // Afficher le loader
       compareLoader.classList.remove('hidden');
-      
-      // Désactiver le bouton pour éviter les doubles soumissions
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = '0.7';
-      submitBtn.style.cursor = 'not-allowed';
-      
       // Optionnel: Ajouter un délai minimal pour que l'utilisateur voie le loader
+      // NOTE: nous n'empêchons plus le bouton d'être actif (pas de disable) — la logique
+      // de validation/confirmation (SweetAlert) est gérée dans public/js/landing.js
       setTimeout(() => {
         // Le formulaire continue sa soumission normale
         // Le loader restera visible jusqu'au rechargement de la page

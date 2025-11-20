@@ -86,6 +86,23 @@
                   <span class="text">Admin - Fournitures</span>
                   </a>
               </li>
+              <li class="nav-item">
+                  <a href="{{ route('admin.merceries.index') }}">
+                  <span class="icon">
+                      <i class="fa-solid fa-shield-halved"></i>
+                  </span>
+                  <span class="text">Admin - Merceries</span>
+                  </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('admin.notifications.index') }}">
+                <span class="icon">
+                  <i class="fa-solid fa-bell"></i>
+                </span>
+                @php $adminUnread = auth()->user()->unreadNotifications()->count(); @endphp
+                <span class="text">Admin - Notifications @if($adminUnread > 0) <span class="badge bg-danger ms-2">{{ $adminUnread }}</span> @endif</span>
+                </a>
+              </li>
             @endif
             @if(auth()->user()->isCouturier())
               <li class="nav-item">

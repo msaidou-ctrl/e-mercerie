@@ -129,6 +129,31 @@
     if(compareForm && compareLoader && submitBtn){
       compareForm.addEventListener('submit', function(e){
         try{
+          // Prevent submission when no supplies selected: show a friendly alert
+          try{
+            const all = window.SUPPLIES_STATE && typeof window.SUPPLIES_STATE.getAll === 'function' ? window.SUPPLIES_STATE.getAll() : {};
+            const hasAny = Object.keys(all).some(id => {
+              const v = all[id] || {};
+              return (typeof v.quantity !== 'undefined' && Number(v.quantity) > 0) || (typeof v.measure !== 'undefined' && parseFloat(v.measure) > 0);
+            });
+            if(!hasAny){
+              // try SweetAlert2 if present
+              if(window.Swal && typeof window.Swal.fire === 'function'){
+                e.preventDefault();
+                window.Swal.fire({
+                  icon: 'warning',
+                  title: 'Aucune fourniture sélectionnée',
+                  text: 'Veuillez sélectionner au moins une fourniture avant de comparer les merceries.',
+                  confirmButtonText: 'Ok'
+                });
+                return;
+              }
+              // fallback to native alert
+              e.preventDefault();
+              alert('Veuillez sélectionner au moins une fourniture avant de comparer les merceries.');
+              return;
+            }
+          }catch(err){ /* ignore and continue to regular submit flow */ }
           // Prevent double submits: if already submitting, ignore subsequent submits
           if (compareForm.dataset.submitting === '1') {
             e.preventDefault();

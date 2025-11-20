@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\MerchantSupply;
 use App\Models\Supply;
+use App\Models\User;
+use App\Notifications\MerchantFirstSupply;
 use Illuminate\Http\Request;
 
 class MerchantSupplyController extends Controller
@@ -62,7 +64,17 @@ class MerchantSupplyController extends Controller
         $search = $request->get('q');
         $supplies = Supply::whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
             ->limit(20)
-            ->get(['id', 'name as text']);
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'text' => $s->name,
+                    'name' => $s->name,
+                    'description' => $s->description,
+                    'price' => $s->price,
+                    'image_url' => $s->image_url ?? null,
+                ];
+            });
 
         return response()->json(['results' => $supplies]);
     }
@@ -119,6 +131,37 @@ class MerchantSupplyController extends Controller
         $merchantSupply->sale_mode = $adminSaleMode;
         if ($adminMeasure) $merchantSupply->measure = $adminMeasure;
         $merchantSupply->save();
+
+        // Notify admins if this is the merchant's first supply
+        try {
+            $count = MerchantSupply::where('user_id', $request->user()->id)->count();
+            if ($count === 1) {
+                $admins = User::where('role', 'admin')->get();
+                if ($admins->isNotEmpty()) {
+                    foreach ($admins as $admin) {
+                        $notification = new MerchantFirstSupply($request->user());
+                        // database + broadcast
+                        $admin->notify($notification);
+                        // send web-push via job (non bloquant)
+                        try {
+                            $notification->sendWebPushNotification($admin);
+                        } catch (\Throwable $t) {
+                            \Log::error('Failed to dispatch web-push for first merchant supply', [
+                                'admin_id' => $admin->id,
+                                'merchant_id' => $request->user()->id,
+                                'error' => $t->getMessage(),
+                            ]);
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $ex) {
+            // don't block merchant flow if notification fails; log for later inspection
+            \Log::error('Failed to notify admins about first merchant supply', [
+                'merchant_id' => $request->user()->id,
+                'error' => $ex->getMessage()
+            ]);
+        }
 
         return redirect()->route('merchant.supplies.index')
             ->with('success', 'Fourniture ajoutée à votre boutique');
