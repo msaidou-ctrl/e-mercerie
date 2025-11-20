@@ -48,5 +48,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Public endpoint to fetch quarters for a city (used by the profile form)
 Route::get('/cities/{city}/quarters', function (\App\Models\City $city) {
-    return response()->json($city->quarters()->select('id','name')->orderBy('name')->get());
+    try {
+        $quarters = $city->quarters()->select('id','name')->orderBy('name')->get();
+        return response()->json($quarters);
+    } catch (\Exception $e) {
+        // Log the error so we can investigate on production
+        logger()->error('API /cities/{city}/quarters failed', [
+            'city_id' => $city->id ?? null,
+            'error' => $e->getMessage(),
+        ]);
+
+        // Return an empty array to the client to avoid breaking UI; frontend can show an "Erreur" option
+        return response()->json([], 200);
+    }
 });

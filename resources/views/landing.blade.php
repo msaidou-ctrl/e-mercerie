@@ -1936,153 +1936,25 @@ const observer = new IntersectionObserver(entries => {
 
 document.querySelectorAll('.card').forEach(c => observer.observe(c));
 
-// GESTION DES CONTRÔLES DE QUANTITÉ AVEC BOUTONS +/-
-document.addEventListener('DOMContentLoaded', function() {
-  // Fonction pour mettre à jour la valeur
-  function updateQuantity(input, change, isMeasure = false, step = 1) {
-    let currentValue;
-    
-    if (isMeasure) {
-      // Pour les mesures, on gère les décimales
-      currentValue = parseFloat(input.value) || 0;
-      const newValue = Math.max(0, currentValue + (change * step));
-      input.value = newValue.toFixed(1);
-    } else {
-      // Pour les quantités, on gère les entiers
-      currentValue = parseInt(input.value) || 0;
-      const newValue = Math.max(0, currentValue + change);
-      input.value = newValue;
-    }
-    
-    // Animation de feedback
-    input.classList.add('updated');
-    setTimeout(() => input.classList.remove('updated'), 300);
-    
-    // Mise à jour de l'état des boutons
-    updateButtonStates(input, isMeasure);
-  }
-  
-  // Fonction pour mettre à jour l'état des boutons
-  function updateButtonStates(input, isMeasure) {
-    const value = isMeasure ? parseFloat(input.value) : parseInt(input.value);
-    const container = input.closest('.quantity-controls');
-    const minusBtn = container?.querySelector('.quantity-btn.minus');
-    
-    if (minusBtn) {
-      minusBtn.disabled = value <= 0;
-    }
-  }
-  
-  // Gestion des clics sur les boutons +/-
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.quantity-btn')) {
-        const btn = e.target.closest('.quantity-btn');
-        const targetId = btn.dataset.target;
-        const input = document.getElementById(targetId);
-
-        if (input) {
-            const isMeasure = input.dataset.measure === 'true';
-
-            // Pas fixe : 0.5 pour les mesures, 1 pour les quantités normales
-            const step = isMeasure ? 0.5 : 1;
-
-            const isPlus = btn.classList.contains('plus');
-
-            updateQuantity(input, isPlus ? 1 : -1, isMeasure, step);
-
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+// Gestion des clics sur les boutons +/-
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.quantity-btn')) {
+            const btn = e.target.closest('.quantity-btn');
+            const targetId = btn.dataset.target;
+            const input = document.getElementById(targetId);
+            
+            if (input) {
+                const isMeasure = input.dataset.measure === 'true';
+                const step = parseFloat(btn.dataset.step) || 1;
+                const isPlus = btn.classList.contains('plus');
+                
+                updateQuantity(input, isPlus ? 1 : -1, isMeasure, step);
+                
+                // Déclencher l'événement change pour les écouteurs existants
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         }
-    }
-  });
-
-  
-  // Validation des inputs
-  document.addEventListener('input', function(e) {
-    if (e.target.classList.contains('quantity-input')) {
-      const input = e.target;
-      const isMeasure = input.dataset.measure === 'true';
-      
-      if (isMeasure) {
-        // Validation pour les mesures (nombres décimaux)
-        let value = parseFloat(input.value);
-        if (isNaN(value) || value < 0) {
-          input.value = '0';
-        } else {
-          input.value = value.toFixed(1);
-        }
-      } else {
-        // Validation pour les quantités (nombres entiers)
-        let value = parseInt(input.value);
-        if (isNaN(value) || value < 0) {
-          input.value = '0';
-        } else {
-          input.value = value;
-        }
-      }
-      
-      updateButtonStates(input, isMeasure);
-    }
-  });
-  
-  // Initialisation de l'état des boutons
-  document.querySelectorAll('.quantity-input').forEach(input => {
-    const isMeasure = input.dataset.measure === 'true';
-    updateButtonStates(input, isMeasure);
-  });
-
-  // BOUTON DE RÉINITIALISATION AMÉLIORÉ
-  const resetBtn = document.getElementById('reset-supplies-values');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', function() {
-      // Réinitialiser tous les champs quantité et mesure
-      document.querySelectorAll('.quantity-input').forEach(input => {
-        input.value = '0';
-        
-        // Mettre à jour l'état des boutons
-        const isMeasure = input.dataset.measure === 'true';
-        updateButtonStates(input, isMeasure);
-        
-        // Animation de feedback
-        input.classList.add('updated');
-        setTimeout(() => input.classList.remove('updated'), 300);
-      });
-      
-      // Animation de succès sur le bouton
-      resetBtn.classList.add('success');
-      setTimeout(() => resetBtn.classList.remove('success'), 1000);
-      
-      // Feedback visuel
-      const originalText = resetBtn.innerHTML;
-      resetBtn.innerHTML = '<i class="fas fa-check"></i> Valeurs réinitialisées !';
-      setTimeout(() => {
-        resetBtn.innerHTML = originalText;
-      }, 2000);
     });
-  }
-
-  // GESTION DU LOADER DE COMPARAISON
-  const compareForm = document.getElementById('compare-form');
-  const compareLoader = document.getElementById('compare-loader');
-  const submitBtn = compareForm ? compareForm.querySelector('.submit-btn') : null;
-
-  // Compare form loader
-  if (compareForm && compareLoader && submitBtn) {
-    compareForm.addEventListener('submit', function (e) {
-      // Afficher le loader
-      compareLoader.classList.remove('hidden');
-      // Optionnel: Ajouter un délai minimal pour que l'utilisateur voie le loader
-      // NOTE: nous n'empêchons plus le bouton d'être actif (pas de disable) — la logique
-      // de validation/confirmation (SweetAlert) est gérée dans public/js/landing.js
-      setTimeout(() => {
-        // Le formulaire continue sa soumission normale
-        // Le loader restera visible jusqu'au rechargement de la page
-      }, 500);
-    });
-  }
-
-  // LIVE SEARCH FOR LANDING
-  // Mercerie live-search and pagination have been removed from the landing page.
-});
 </script>
 
 </body>
