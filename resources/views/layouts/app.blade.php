@@ -338,7 +338,7 @@
                         fill="" />
                     </svg>
                     @php $unreadCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0; @endphp
-                    <span id="notification-unread-badge" data-count="{{ $unreadCount }}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:{{ $unreadCount > 0 ? 'inline-block' : 'none' }}; font-size:0.65rem; display:flex; justify-content:center; align-items:center;">{{ $unreadCount }}</span>
+                    <span id="notification-unread-badge" data-count="{{ $unreadCount }}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $unreadCount > 0 ? 'd-inline-flex' : 'd-none' }}" style="min-width:22px; height:22px; font-weight:700; align-items:center; justify-content:center; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3); animation: pulse 2s infinite; line-height:1; padding:2px 6px;">{{ $unreadCount }}</span>
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notification" style="width:320px;">
                     @php
@@ -754,8 +754,16 @@
       const badge = document.getElementById('notification-unread-badge');
       if (!badge) return;
       badge.dataset.count = count;
-      badge.textContent = count;
-      badge.style.display = count > 0 ? 'inline-block' : 'none';
+      if (count > 0) {
+        badge.classList.remove('d-none');
+        badge.classList.add('d-inline-flex');
+        badge.textContent = count;
+      } else {
+        badge.classList.remove('d-inline-flex');
+        badge.classList.add('d-none');
+        // keep dataset.count = 0 but don't show a visible "0"
+        badge.textContent = '';
+      }
     }
 
     function incrementUnreadBadge(by = 1) {
