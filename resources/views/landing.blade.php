@@ -1975,22 +1975,25 @@ document.addEventListener('DOMContentLoaded', function() {
   // Gestion des clics sur les boutons +/-
   document.addEventListener('click', function(e) {
     if (e.target.closest('.quantity-btn')) {
-      const btn = e.target.closest('.quantity-btn');
-      const targetId = btn.dataset.target;
-      const input = document.getElementById(targetId);
-      
-      if (input) {
-        const isMeasure = input.dataset.measure === 'true';
-        const step = parseFloat(btn.dataset.step) || 1;
-        const isPlus = btn.classList.contains('plus');
-        
-        updateQuantity(input, isPlus ? 1 : -1, isMeasure, step);
-        
-        // Déclencher l'événement change pour les écouteurs existants
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      }
+        const btn = e.target.closest('.quantity-btn');
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+
+        if (input) {
+            const isMeasure = input.dataset.measure === 'true';
+
+            // Pas fixe : 0.5 pour les mesures, 1 pour les quantités normales
+            const step = isMeasure ? 0.5 : 1;
+
+            const isPlus = btn.classList.contains('plus');
+
+            updateQuantity(input, isPlus ? 1 : -1, isMeasure, step);
+
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
     }
   });
+
   
   // Validation des inputs
   document.addEventListener('input', function(e) {

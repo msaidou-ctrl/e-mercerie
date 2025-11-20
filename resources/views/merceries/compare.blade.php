@@ -2,9 +2,9 @@
 
 @section('content')
 <div class="compare-container">
-    <div class="page-header">
-        <h1 class="page-title">Comparaison des merceries</h1>
-        <p class="page-subtitle">Trouvez la meilleure mercerie pour vos besoins</p>
+    <div class="card-header mb-5">
+        <h1>Comparaison des merceries</h1>
+        <p>Trouvez la meilleure mercerie pour vos besoins</p>
     </div>
 
     @if(isset($selectedCity) || isset($selectedQuarter))

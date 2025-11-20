@@ -14,10 +14,6 @@ COPY . .
 # ✅ Installation des dépendances
 RUN composer install --no-dev --optimize-autoloader
 
-# ✅ Créer les tables de session/cache
-# RUN php artisan session:table --no-interaction || true
-# RUN php artisan cache:table --no-interaction || true
-
 # ✅ Permissions correctes
 RUN chown -R www-data:www-data storage bootstrap/cache && \
     chmod -R 775 storage bootstrap/cache
@@ -37,19 +33,13 @@ COPY --from=build /var/www /var/www
 RUN chown -R www-data:www-data storage bootstrap/cache public && \
     chmod -R 775 storage bootstrap/cache public
 
-# 🚫 NE PAS changer d’utilisateur avant storage:link
-# USER www-data   ← ❌ ENLEVER CECI
-
-# Commande de démarrage en root
+# ✅ Créer le lien symbolique UNIQUEMENT s'il n'existe pas déjà
 CMD ["sh", "-c", "\
     php artisan config:cache && \
     php artisan config:clear && \
     php artisan migrate --force && \
-    php artisan storage:link && \
-    php artisan serve --host=0.0.0.0 --port=$PORT\
+    if [ ! -L public/storage ]; then php artisan storage:link; fi && \
+    php artisan serve --host=0.0.0.0 --port=\$PORT\
 "]
 
 EXPOSE $PORT
-
-# Après les commandes Artisan, tu peux repasser en www-data si tu veux :
-# USER www-data

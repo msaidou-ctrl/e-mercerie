@@ -85,36 +85,50 @@
 
         // delegated plus/minus
         document.addEventListener('click', function(e){
-          const btn = e.target.closest('.quantity-btn');
-          if(!btn) return;
-          const targetId = btn.dataset.target;
-          const input = document.getElementById(targetId);
-          if(!input) return;
-          const isMeasure = input.dataset.measure === 'true';
-          const step = parseFloat(btn.dataset.step) || 1;
-          const isPlus = btn.classList.contains('plus');
-          if(isMeasure){
-            let current = parseFloat(input.value) || 0;
-            const newVal = Math.max(0, current + (isPlus ? step : -step));
-            input.value = newVal.toFixed(1);
-          } else {
-            let current = parseInt(input.value) || 0;
-            const newVal = Math.max(0, current + (isPlus ? 1 : -1));
-            input.value = newVal;
-          }
-          // visual pulse
-          input.classList.add('updated'); setTimeout(()=>input.classList.remove('updated'),300);
-          // persist immediately
-          try{
-            const parts = input.id.split('_'); const id = parts.slice(1).join('_');
-            if(isMeasure) window.SUPPLIES_STATE.setValue(id,'measure', input.value);
-            else window.SUPPLIES_STATE.setValue(id,'quantity', input.value);
-          }catch(e){}
-          // update button states immediately so minus is enabled after a plus
-          try{ updateButtonStates(input, isMeasure); }catch(e){}
-          // fire input so other listeners react (validation, subtotal)
-          input.dispatchEvent(new Event('input', { bubbles:true }));
-        });
+  const btn = e.target.closest('.quantity-btn');
+  if(!btn) return;
+  const targetId = btn.dataset.target;
+  const input = document.getElementById(targetId);
+  if(!input) return;
+  const isMeasure = input.dataset.measure === 'true';
+  const isPlus = btn.classList.contains('plus');
+  
+  if(isMeasure){
+    // Pour les mesures : utiliser le step défini dans data-step (généralement 0.5)
+    const step = parseFloat(btn.dataset.step) || 0.5;
+    let current = parseFloat(input.value) || 0;
+    const newVal = Math.max(0, current + (isPlus ? step : -step));
+    input.value = newVal.toFixed(1);
+  } else {
+    // Pour les quantités : TOUJOURS 1, ignorer data-step
+    let current = parseInt(input.value) || 0;
+    const newVal = Math.max(0, current + (isPlus ? 1 : -1));
+    input.value = newVal;
+  }
+  
+  // visual pulse
+  input.classList.add('updated'); 
+  setTimeout(() => input.classList.remove('updated'), 300);
+  
+  // persist immediately
+  try{
+    const parts = input.id.split('_'); 
+    const id = parts.slice(1).join('_');
+    if(isMeasure) {
+      window.SUPPLIES_STATE.setValue(id, 'measure', input.value);
+    } else {
+      window.SUPPLIES_STATE.setValue(id, 'quantity', input.value);
+    }
+  } catch(e) {}
+  
+  // update button states immediately so minus is enabled after a plus
+  try{ 
+    updateButtonStates(input, isMeasure); 
+  } catch(e) {}
+  
+  // fire input so other listeners react (validation, subtotal)
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+});
 
     // input validation and persist
     document.addEventListener('input', function(e){ if(!e.target.classList.contains('quantity-input')) return; const input = e.target; const isMeasure = input.dataset.measure === 'true'; if(isMeasure){ let v = parseFloat(input.value); if(isNaN(v)||v<0) input.value='0'; else input.value = v.toFixed(1); } else { let v = parseInt(input.value); if(isNaN(v)||v<0) input.value='0'; else input.value = v; } updateButtonStates(input,isMeasure); try{ const parts=input.id.split('_'); const id=parts.slice(1).join('_'); if(id){ if(isMeasure) window.SUPPLIES_STATE.setValue(id,'measure',input.value); else window.SUPPLIES_STATE.setValue(id,'quantity',input.value); } }catch(err){} });
