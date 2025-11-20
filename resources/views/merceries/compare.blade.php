@@ -671,6 +671,11 @@
     margin-bottom: 0.75rem;
 }
 
+.swal2-actions{
+    display: flex;
+    gap: 10px;
+}
+
 .missing-list {
     list-style: none;
     margin: 0;
@@ -979,18 +984,22 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const details = form.querySelectorAll('.details-list li');
-            const itemsCount = details.length;
-            const priceSpan = form.closest('.mercerie-card')?.querySelector('.price-amount');
+            // Use the enclosing card as the source of truth (details list and price live outside the form)
+            const card = form.closest('.mercerie-card');
+            const details = card ? card.querySelectorAll('.details-list li') : form.querySelectorAll('.details-list li');
+            const itemsCount = details ? details.length : 0;
+            const priceSpan = card ? card.querySelector('.price-amount') : form.closest('.mercerie-card')?.querySelector('.price-amount');
             const totalText = priceSpan ? priceSpan.textContent.trim() : null;
+            const mercerieNameEl = card ? card.querySelector('.mercerie-name') : null;
+            const mercerieName = mercerieNameEl ? mercerieNameEl.textContent.trim() : '{{ $mercerie['mercerie']['name'] ?? '' }}';
 
             const html = `<div class="text-start" style="color: var(--text-primary);">
-                <p style="margin-bottom: 1rem;">Vous êtes sur le point de valider une commande pour cette mercerie.</p>
+                <p style="margin-bottom: 1rem;"><strong>Vous êtes sur le point de valider une commande pour :</strong><br/><strong>${mercerieName}</strong></p>
                 <div style="background: var(--surface-color); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
                     <p style="margin: 0.5rem 0;"><strong>Articles :</strong> ${itemsCount}</p>
                     ${totalText ? `<p style="margin: 0.5rem 0;"><strong>Total estimé :</strong> ${totalText}</p>` : ''}
                 </div>
-                <p style="color: var(--text-secondary); font-size: 0.875rem;">Cette action créera une commande chez le marchand.</p>
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">Cette action enverra votre commande à la mercerie pour validation.</p>
             </div>`;
 
             if (typeof Swal !== 'undefined') {
@@ -1013,13 +1022,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (result.isConfirmed) {
                         // Ajouter un indicateur de chargement
                         const submitBtn = form.querySelector('button[type="submit"]');
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-                        submitBtn.disabled = true;
-                        
+                        if (submitBtn) {
+                            const originalHTML = submitBtn.innerHTML;
+                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement...';
+                            submitBtn.disabled = true;
+                        }
+
                         setTimeout(() => {
                             form.submit();
-                        }, 500);
+                        }, 400);
                     }
                 });
                 return;

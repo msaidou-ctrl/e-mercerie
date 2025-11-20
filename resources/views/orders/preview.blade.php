@@ -501,10 +501,10 @@
 
 <div class="container my-5">
     <!-- Titre principal -->
-    <div class="card-header">
+    <div class="card-header mb-5">
         <h1>
             Prévisualisation de la commande
-            <span class="mercerie-name">{{ $mercerie->name }}</span>
+            <span class="mercerie-name">{{ $mercerie->business_name }}</span>
         </h1>
     </div>
 

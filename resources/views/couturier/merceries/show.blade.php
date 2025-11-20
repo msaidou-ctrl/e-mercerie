@@ -3,7 +3,7 @@
 @section('content')
 <!-- 🔹 En-tête principale pleine largeur -->
 <div class="card-header">
-    <h1>{{ $mercerie->name }}</h1>
+    <h1>{{ $mercerie->business_name }}</h1>
 </div>
 
 <div class="supplies-container">

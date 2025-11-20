@@ -190,7 +190,17 @@ class OrderController extends Controller
 
             // Notification à la mercerie
             $mercerie = $order->mercerie;
-            $mercerie->notify(new NewOrderReceived($order));
+            try {
+                if ($mercerie) {
+                    $notification = new NewOrderReceived($order);
+                    $mercerie->notify($notification);
+
+                    // Dispatch the web-push job (if any subscriptions exist)
+                    $notification->sendWebPushNotification($mercerie);
+                }
+            } catch (\Exception $e) {
+                logger()->error('Erreur lors de l\'envoi de la notification NewOrderReceived (storeWeb): ' . $e->getMessage());
+            }
 
             DB::commit();
             return redirect()->route('orders.index')->with('success', 'Commande créée avec succès !');

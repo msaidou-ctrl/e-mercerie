@@ -265,6 +265,30 @@
   @keyframes slideInRight { from { transform: translateX(100px); opacity:0; } to { transform: translateX(0); opacity:1; } }
   @keyframes float { 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);} }
   @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+    /* Loader (re-used from login) */
+    .btn-loader {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        margin-left: 10px;
+    }
+
+    .loader-spinner {
+        box-sizing: border-box;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.2);
+        border-top-color: rgba(255,255,255,0.95);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .hidden { display: none !important; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -305,7 +329,10 @@
               <option value="mercerie" {{ old('role')=='mercerie'?'selected':'' }}>Mercerie</option>
           </select>
 
-          <button type="submit">S'inscrire</button>
+          <button type="submit" class="register-submit-btn">
+              <span class="btn-text">S'inscrire</span>
+              <span class="btn-loader hidden"><span class="loader-spinner" aria-hidden="true"></span></span>
+          </button>
       </form>
 
       <p class="signup-text">Déjà inscrit ? <a href="{{ route('login.form') }}">Se connecter</a></p>
@@ -346,6 +373,27 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmButtonColor: '#4F0341'
         });
     @endif
+
+    // Register button loader: show spinner and disable button on submit
+    try {
+        const registerForm = document.querySelector('form[action="{{ route('register.submit') }}"]');
+        const fallbackRegisterForm = document.querySelector('.sign-up-container form');
+        const form = registerForm || fallbackRegisterForm;
+        if (form) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                form.addEventListener('submit', function() {
+                    submitBtn.disabled = true;
+                    const text = submitBtn.querySelector('.btn-text');
+                    const loader = submitBtn.querySelector('.btn-loader');
+                    if (text) text.style.opacity = '0';
+                    if (loader) loader.classList.remove('hidden');
+                });
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
 });
 </script>
 

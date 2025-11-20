@@ -593,6 +593,32 @@
     outline: 2px solid var(--main-color);
     outline-offset: 2px;
   }
+
+  /* Loader pour les boutons */
+  .btn-loader {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+  }
+
+  .loader-spinner {
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: rgba(255,255,255,0.95);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .hidden { display: none !important; }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 </style>
 </head>
 <body>
@@ -627,7 +653,10 @@
       <input type="hidden" name="redirect_to" id="redirect_to" value="">
       <div class="form-actions">
         <a href="{{ route('password.request') }}">Mot de passe oublié ?</a>
-        <button type="submit">Se connecter</button>
+        <button type="submit" class="login-submit-btn">
+          <span class="btn-text">Se connecter</span>
+          <span class="btn-loader hidden"><span class="loader-spinner" aria-hidden="true"></span></span>
+        </button>
       </div>
     </form>
 
@@ -683,6 +712,27 @@
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
+    }
+
+    // Login button loader: show spinner and disable button on submit
+    try {
+      const loginForm = document.querySelector('form[action="{{ route('login.submit') }}"]');
+      const fallbackForm = document.querySelector('.form-container form');
+      const form = loginForm || fallbackForm;
+      if (form) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        form.addEventListener('submit', function (e) {
+          if (!submitBtn) return;
+          // prevent double submits in case of slow network
+          submitBtn.disabled = true;
+          const text = submitBtn.querySelector('.btn-text');
+          const loader = submitBtn.querySelector('.btn-loader');
+          if (text) text.style.opacity = '0';
+          if (loader) loader.classList.remove('hidden');
+        });
+      }
+    } catch (e) {
+      // ignore
     }
   });
 </script>

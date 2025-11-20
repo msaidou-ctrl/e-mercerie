@@ -72,17 +72,25 @@
         <!-- ✅ Actions -->
         @if(auth()->user()->isMercerie() && $order->status === 'pending')
             <div class="actions">
-                <form action="{{ route('merchant.orders.accept', $order->id) }}" method="POST">
+                <form action="{{ route('merchant.orders.accept', $order->id) }}" method="POST" class="action-form accept-form">
                     @csrf
-                    <button type="submit" class="soft-btn success">
-                        <i class="lni lni-checkmark-circle"></i> Accepter
+                    <button type="submit" class="soft-btn success accept-btn" data-order-id="{{ $order->id }}">
+                        <i class="lni lni-checkmark-circle btn-icon"></i>
+                        <span class="btn-text">Accepter</span>
+                        <div class="btn-loader hidden">
+                            <div class="loader-spinner"></div>
+                        </div>
                     </button>
                 </form>
 
-                <form action="{{ route('merchant.orders.reject', $order->id) }}" method="POST">
+                <form action="{{ route('merchant.orders.reject', $order->id) }}" method="POST" class="action-form reject-form">
                     @csrf
-                    <button type="submit" class="soft-btn danger">
-                        <i class="lni lni-close"></i> Rejeter
+                    <button type="submit" class="soft-btn danger reject-btn" data-order-id="{{ $order->id }}">
+                        <i class="lni lni-close btn-icon"></i>
+                        <span class="btn-text">Rejeter</span>
+                        <div class="btn-loader hidden">
+                            <div class="loader-spinner"></div>
+                        </div>
                     </button>
                 </form>
             </div>
@@ -268,4 +276,48 @@
     text-align: center;
 }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const acceptBtn = document.querySelector('.accept-btn');
+    const rejectBtn = document.querySelector('.reject-btn');
+
+    function handleActionButtonClick(button, isAccept = true) {
+        if (!button) return;
+        const form = button.closest('form');
+        const btnText = button.querySelector('.btn-text');
+        const btnLoader = button.querySelector('.btn-loader');
+        const btnIcon = button.querySelector('.btn-icon');
+
+        // Disable clicked button and show loader
+        button.disabled = true;
+        if (btnIcon) btnIcon.style.opacity = '0';
+        if (btnText) btnText.textContent = isAccept ? 'Traitement...' : 'Rejet en cours...';
+        if (btnLoader) btnLoader.classList.remove('hidden');
+
+        // Disable other action buttons
+        document.querySelectorAll('.accept-btn, .reject-btn').forEach(b => {
+            if (b !== button) b.disabled = true;
+        });
+
+        // Submit the form after a short delay for visual effect
+        setTimeout(() => {
+            if (form) form.submit();
+        }, 400);
+    }
+
+    if (acceptBtn) {
+        acceptBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleActionButtonClick(this, true);
+        });
+    }
+
+    if (rejectBtn) {
+        rejectBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleActionButtonClick(this, false);
+        });
+    }
+});
+</script>
 @endsection

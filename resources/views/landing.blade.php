@@ -1722,9 +1722,7 @@ footer p {
       @csrf
 
       <div class="form-actions">
-        <button type="submit" class="soft-btn submit-btn">
-          <i class="fas fa-chart-bar"></i> Comparer les merceries
-        </button>
+        
         <button type="button" id="reset-supplies-values" class="reset-btn">
           <i class="fas fa-undo"></i> Réinitialiser les valeurs
         </button>
@@ -1840,6 +1838,9 @@ footer p {
           </div>
         @endif
       @endif
+      <button type="submit" class="soft-btn submit-btn">
+          <i class="fas fa-chart-bar"></i> Comparer les merceries
+        </button>
     </form>
     <!-- Loader de comparaison -->
     <div id="compare-loader" class="compare-loader hidden">
