@@ -52,10 +52,10 @@ Route::get('/cities/{city}/quarters', function (\App\Models\City $city) {
         $quarters = $city->quarters()->select('id','name')->orderBy('name')->get();
         return response()->json($quarters);
     } catch (\Exception $e) {
-        // Log the error so we can investigate on production
-        logger()->error('API /cities/{city}/quarters failed', [
+        // Log the full exception (message + stack trace) to help debugging in production
+        logger()->error('API /cities/{city}/quarters failed: ' . $e->getMessage(), [
             'city_id' => $city->id ?? null,
-            'error' => $e->getMessage(),
+            'exception' => (string) $e,
         ]);
 
         // Return an empty array to the client to avoid breaking UI; frontend can show an "Erreur" option
