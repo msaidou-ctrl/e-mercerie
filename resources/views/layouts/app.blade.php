@@ -642,6 +642,16 @@
     <script src="{{ asset('js/app.js') }}"></script>
   <script src="{{ asset('js/push.js') }}"></script>
 
+  {{-- Preloaded cities & quarters injected server-side to avoid client API calls --}}
+  <script>
+    try {
+      window.CITY_QUARTERS = @json($CITY_QUARTERS_PRELOADED ?? []);
+    } catch (e) {
+      window.CITY_QUARTERS = {};
+      console.warn('Failed to parse preloaded CITY_QUARTERS', e);
+    }
+  </script>
+
     @if(session('success'))
       <script>
         Swal.fire({

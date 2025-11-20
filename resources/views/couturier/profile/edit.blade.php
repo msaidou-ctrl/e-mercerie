@@ -553,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const citySelect = document.getElementById('city_id');
     const quarterSelect = document.getElementById('quarter_id');
 
-    async function loadQuarters(cityId) {
+    function loadQuarters(cityId) {
         if (!cityId) {
             quarterSelect.innerHTML = '<option value="">Sélectionnez un quartier...</option>';
             quarterSelect.disabled = true;
@@ -565,11 +565,10 @@ document.addEventListener('DOMContentLoaded', function () {
         quarterSelect.innerHTML = '<option value="">Chargement des quartiers...</option>';
 
         try {
-            const response = await fetch(`/api/cities/${cityId}/quarters`);
-            if (!response.ok) throw new Error('Erreur réseau');
-            
-            const quarters = await response.json();
-            
+            // Use preloaded data injected as window.CITY_QUARTERS (no API call)
+            const all = window.CITY_QUARTERS || {};
+            const quarters = Array.isArray(all[cityId]) ? all[cityId] : [];
+
             quarterSelect.innerHTML = '<option value="">Sélectionnez un quartier...</option>';
             quarters.forEach(quarter => {
                 const option = document.createElement('option');
@@ -577,10 +576,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 option.textContent = quarter.name;
                 quarterSelect.appendChild(option);
             });
-            
+
             quarterSelect.disabled = false;
             quarterSelect.classList.remove('loading');
-            
+
             // Pré-sélectionner si une valeur existe
             const selectedQuarter = '{{ old('quarter_id', $user->quarter_id) }}';
             if (selectedQuarter) {

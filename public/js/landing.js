@@ -5,7 +5,8 @@
   const rootUrl = cfg.rootUrl || '';
   const routes = cfg.routes || {};
   const suppliesSearch = routes.suppliesSearch || '/api/fournitures/search';
-  const cityQuarters = routes.cityQuarters || '/api/cities/:id/quarters';
+  // cityQuarters API endpoint is no longer used for quarters: we prefer server-side preload via window.CITY_QUARTERS
+  const cityQuarters = routes.cityQuarters || '';
   const pushSubscribe = routes.pushSubscribe || '';
   const assetDefaultImage = cfg.assetDefaultImage || (rootUrl + '/images/default.png');
   const csrfToken = cfg.csrfToken || '';
@@ -278,8 +279,37 @@
     function updateCardSubtotal(card){ if(!card) return; const measureInput = card.querySelector('input[data-measure="true"]'); if(!measureInput) return; const val = (measureInput.value||'').trim(); const meters = parseMeasureToMeters(val); const priceEl = card.querySelector('.price .amount'); if(!priceEl) return; const price = parsePriceFromAmountText(priceEl.textContent||priceEl.innerText||'0'); let subtotalEl = card.querySelector('.subtotal-line'); if(!subtotalEl){ subtotalEl = document.createElement('div'); subtotalEl.className='subtotal-line'; subtotalEl.style.marginTop='6px'; subtotalEl.style.fontWeight='600'; const priceQty = card.querySelector('.price-qty')||card; priceQty.appendChild(subtotalEl); } if(meters!==null && meters>0){ const subtotal = Math.round(price * meters); subtotalEl.textContent = `Sous-total : ${formatNumberWithSpaces(subtotal)} FCFA`; } else { subtotalEl.textContent = ''; } }
     document.querySelectorAll('input[data-measure="true"]').forEach(inp=>{ inp.addEventListener('input', function(){ const card = inp.closest('.supply-card'); updateCardSubtotal(card); }); });
     const suppliesList = document.getElementById('supplies-list'); if(suppliesList){ const mo = new MutationObserver(muts=>{ muts.forEach(m=>{ m.addedNodes && m.addedNodes.forEach(n=>{ if(n.nodeType===1 && n.matches('.supply-card')){ const inp = n.querySelector('input[data-measure="true"]'); if(inp) inp.addEventListener('input', ()=>updateCardSubtotal(n)); } }); }); }); mo.observe(suppliesList, { childList:true }); }
-    // quarter loader
-    try{ const citySelect = document.getElementById('city_id'); const quarterSelect = document.getElementById('quarter_id'); const quarterLoader = document.getElementById('quarter-loader'); if(citySelect && quarterSelect){ citySelect.addEventListener('change', async function(){ const id = this.value; quarterSelect.disabled = true; quarterLoader && quarterLoader.classList.remove('hidden'); quarterSelect.innerHTML = '<option value="">Chargement...</option>'; if(!id){ quarterSelect.innerHTML = '<option value="">Tous les quartiers</option>'; quarterSelect.disabled = true; quarterLoader && quarterLoader.classList.add('hidden'); return; } try{ const res = await fetch(`/api/cities/${encodeURIComponent(id)}/quarters`, { headers:{ 'Accept':'application/json' }, credentials:'same-origin' }); if(!res.ok) throw new Error('Network'); const data = await res.json(); quarterSelect.innerHTML = '<option value="">Tous les quartiers</option>' + data.map(q=>`<option value="${q.id}">${q.name}</option>`).join(''); }catch(err){ quarterSelect.innerHTML = '<option value="">Erreur</option>'; } finally { quarterSelect.disabled = false; quarterLoader && quarterLoader.classList.add('hidden'); } }); } }catch(e){}
+    // quarter loader (use only preloaded window.CITY_QUARTERS)
+  try{
+    const citySelect = document.getElementById('city_id');
+    const quarterSelect = document.getElementById('quarter_id');
+    const quarterLoader = document.getElementById('quarter-loader');
+    if(citySelect && quarterSelect){
+      citySelect.addEventListener('change', function(){
+        const id = this.value;
+        quarterSelect.disabled = true;
+        quarterLoader && quarterLoader.classList.remove('hidden');
+        quarterSelect.innerHTML = '<option value="">Chargement...</option>';
+        if(!id){
+          quarterSelect.innerHTML = '<option value="">Tous les quartiers</option>';
+          quarterSelect.disabled = true;
+          quarterLoader && quarterLoader.classList.add('hidden');
+          return;
+        }
+
+        try{
+          const all = window.CITY_QUARTERS || {};
+          const data = Array.isArray(all[id]) ? all[id] : [];
+          quarterSelect.innerHTML = '<option value="">Tous les quartiers</option>' + (Array.isArray(data) ? data.map(q=>`<option value="${q.id}">${escapeHtml(q.name)}</option>`).join('') : '');
+        } catch(err) {
+          quarterSelect.innerHTML = '<option value="">Erreur</option>';
+        } finally {
+          quarterSelect.disabled = false;
+          quarterLoader && quarterLoader.classList.add('hidden');
+        }
+      });
+    }
+  }catch(e){}
     // profile fallback
     try{ const profileBtn = document.getElementById('profile'); if(profileBtn){ const menu = profileBtn.closest('.profile-box').querySelector('.dropdown-menu'); profileBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); menu.classList.toggle('show'); }); document.addEventListener('click', function(e){ if(!profileBtn.contains(e.target) && !menu.contains(e.target)) menu.classList.remove('show'); }); } }catch(e){}
   }());

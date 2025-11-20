@@ -1899,6 +1899,15 @@ footer p {
     csrfToken: "{{ csrf_token() }}"
   };
 </script>
+<script>
+  // Inject preloaded cities & quarters for landing (no client API calls)
+  try {
+    window.CITY_QUARTERS = @json($CITY_QUARTERS_PRELOADED ?? []);
+  } catch (e) {
+    window.CITY_QUARTERS = {};
+    console.warn('Failed to parse CITY_QUARTERS on landing', e);
+  }
+</script>
 <script src="{{ asset('js/landing.js') }}"></script>
 
 <script>

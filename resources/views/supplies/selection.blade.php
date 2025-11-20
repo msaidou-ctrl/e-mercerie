@@ -404,14 +404,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!citySelect || !quarterSelect) return;
 
-                async function loadQuarters(cityId) {
+                function loadQuarters(cityId) {
                                 quarterSelect.disabled = true;
                                 quarterLoader.classList.remove('hidden');
                                 quarterSelect.innerHTML = '<option value="">Chargement...</option>';
                                 try {
-                                                const res = await fetch(`/api/cities/${encodeURIComponent(cityId)}/quarters`, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
-                                                if (!res.ok) throw new Error('Network');
-                                                const data = await res.json();
+                                                const all = window.CITY_QUARTERS || {};
+                                                const data = Array.isArray(all[cityId]) ? all[cityId] : [];
                                                 quarterSelect.innerHTML = '<option value="">Tous les quartiers</option>' + data.map(q => `<option value="${q.id}">${q.name}</option>`).join('');
                                 } catch (e) {
                                                 quarterSelect.innerHTML = '<option value="">Erreur</option>';

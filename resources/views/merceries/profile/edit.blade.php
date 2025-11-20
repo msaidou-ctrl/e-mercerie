@@ -693,29 +693,21 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    async function loadQuarters(cityId, preselectId = null) {
+    function loadQuarters(cityId, preselectId = null) {
         quarterSelect.disabled = true;
         quarterSelect.innerHTML = '<option><span class="loading-spinner"></span> Chargement des quartiers...</option>';
-        
+
         if (!cityId) {
             quarterSelect.disabled = false;
             quarterSelect.innerHTML = '<option value="">Sélectionnez d\'abord une ville</option>';
             return;
         }
 
-        const encodedId = encodeURIComponent(cityId);
-        const url = "{{ rtrim(url('/api/cities'), '/') }}" + '/' + encodedId + '/quarters';
-
         try {
-            const response = await fetch(url, { 
-                headers: { 'Accept': 'application/json' }, 
-                credentials: 'same-origin' 
-            });
-            
-            if (!response.ok) throw new Error(`Erreur ${response.status}`);
-            
-            const data = await response.json();
-            
+            // Use preloaded CITY_QUARTERS injected into the page
+            const all = window.CITY_QUARTERS || {};
+            const data = Array.isArray(all[cityId]) ? all[cityId] : [];
+
             if (!Array.isArray(data) || data.length === 0) {
                 quarterSelect.innerHTML = '<option value="">Aucun quartier disponible</option>';
                 quarterSelect.disabled = false;
@@ -732,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 quarterSelect.appendChild(option);
             });
-            
+
             quarterSelect.disabled = false;
         } catch (error) {
             console.error('Erreur lors du chargement des quartiers:', error);
