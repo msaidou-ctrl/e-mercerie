@@ -49,6 +49,5 @@ CMD ["sh", "-c", "\
 "]
 
 EXPOSE $PORT
-
 # Après les commandes Artisan, tu peux repasser en www-data si tu veux :
 # USER www-data
