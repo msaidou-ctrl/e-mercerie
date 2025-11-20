@@ -742,7 +742,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Chargement initial si une ville est déjà sélectionnée
     if (citySelect.value) {
-        loadQuarters(citySelect.value, selectedQuarterId);
+        // Use preloaded data only when available; otherwise keep server-rendered options
+        try {
+            if (window && window.CITY_QUARTERS && window.CITY_QUARTERS[citySelect.value]) {
+                loadQuarters(citySelect.value, selectedQuarterId);
+            } else {
+                // Ensure the select is enabled so existing server-rendered options remain usable
+                quarterSelect.disabled = false;
+            }
+        } catch (e) {
+            quarterSelect.disabled = false;
+        }
     }
 
     // Amélioration de l'UX sur mobile

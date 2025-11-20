@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use App\Models\City;
+use App\Models\Quarter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,30 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Exception $e) {
             logger()->warning('Failed to preload CITY_QUARTERS in AppServiceProvider: ' . $e->getMessage());
             View::share('CITY_QUARTERS_PRELOADED', []);
+        }
+
+        // Invalidate the cached cities_with_quarters_v1 when cities or quarters change
+        try {
+            City::saved(function () {
+                Cache::forget('cities_with_quarters_v1');
+                logger()->info('Cleared cache: cities_with_quarters_v1 (City saved)');
+            });
+            City::deleted(function () {
+                Cache::forget('cities_with_quarters_v1');
+                logger()->info('Cleared cache: cities_with_quarters_v1 (City deleted)');
+            });
+
+            Quarter::saved(function () {
+                Cache::forget('cities_with_quarters_v1');
+                logger()->info('Cleared cache: cities_with_quarters_v1 (Quarter saved)');
+            });
+            Quarter::deleted(function () {
+                Cache::forget('cities_with_quarters_v1');
+                logger()->info('Cleared cache: cities_with_quarters_v1 (Quarter deleted)');
+            });
+        } catch (\Exception $e) {
+            // Non-fatal: just log the listener wiring failure
+            logger()->warning('Failed to register cache invalidation listeners for CITY_QUARTERS: ' . $e->getMessage());
         }
     }
 }
